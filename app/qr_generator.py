@@ -1,19 +1,20 @@
 ﻿import qrcode
 import os
+import secrets
 from PIL import Image
+from flask import request
 
-def generar_qr_concurso(concurso, base_url='http://localhost:5000'):
+def generar_qr_concurso(concurso):
     """
     Genera un código QR único para el concurso.
-    Retorna la ruta del archivo QR generado.
+    Detecta automáticamente el dominio actual (localhost o Railway).
     """
-    import secrets
-    
     # Generar token único si no existe
     if not concurso.qr_token:
         concurso.qr_token = secrets.token_urlsafe(16)
     
-    # URL de inscripción
+    # Detectar la URL base automáticamente (ej: https://sistema-concursos...up.railway.app)
+    base_url = request.host_url.rstrip('/')
     url_inscripcion = f"{base_url}/inscripcion/{concurso.qr_token}"
     
     # Crear carpeta de QRs si no existe
