@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block title %}Lista de Concursos{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="bi bi-list-ul"></i> Lista de Concursos</h1>
+    <a href="{{ url_for('admin.crear_concurso') }}" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> Nuevo Concurso
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        {% if concursos %}
+        <table class="table table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>Numero</th>
+                    <th>Titulo</th>
+                    <th>Espacio Curricular</th>
+                    <th>Caracter</th>
+                    <th>Estado</th>
+                    <th>Inscriptos</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for c in concursos %}
+                <tr>
+                    <td>{{ c.id }}</td>
+                    <td><strong>{{ c.numero }}</strong></td>
+                    <td>{{ c.titulo }}</td>
+                    <td>{{ c.espacio_curricular }}</td>
+                    <td>{{ c.caracter_cargo }}</td>
+                    <td>
+                        <span class="badge bg-{{ 'success' if c.estado == 'ACTIVO' else 'warning' if c.estado == 'MERITO_GENERADO' else 'danger' if c.estado == 'DESIERTO' else 'secondary' }}">
+                            {{ c.estado }}
+                        </span>
+                    </td>
+                    <td>{{ c.inscripciones|length }}</td>
+                    <td>
+                        <a href="{{ url_for('admin.detalle_concurso', id=c.id) }}" class="btn btn-sm btn-primary" title="Ver detalle">
+                            <i class="bi bi-eye"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="text-muted text-center">No hay concursos creados.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

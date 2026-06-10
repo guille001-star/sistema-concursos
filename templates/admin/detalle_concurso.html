@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+
+{% block title %}Detalle Concurso {{ concurso.numero }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="bi bi-journal-text"></i> Concurso {{ concurso.numero }}</h1>
+    <a href="{{ url_for('admin.listar_concursos') }}" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Volver
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5>Informacion del Concurso</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-borderless">
+                    <tr>
+                        <th style="width: 30%;">Numero:</th>
+                        <td>{{ concurso.numero }}</td>
+                    </tr>
+                    <tr>
+                        <th>Titulo:</th>
+                        <td>{{ concurso.titulo or 'N/A' }}</td>
+                    </tr>
+                    <tr>
+                        <th>Espacio Curricular:</th>
+                        <td>{{ concurso.espacio_curricular or 'N/A' }}</td>
+                    </tr>
+                    <tr>
+                        <th>Caracter del Cargo:</th>
+                        <td>{{ concurso.caracter_cargo }}</td>
+                    </tr>
+                    <tr>
+                        <th>Estado:</th>
+                        <td>
+                            <span class="badge bg-{{ 'success' if concurso.estado == 'ACTIVO' else 'warning' if concurso.estado == 'MERITO_GENERADO' else 'danger' if concurso.estado == 'DESIERTO' else 'secondary' }}">
+                                {{ concurso.estado }}
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Fecha Apertura:</th>
+                        <td>{{ concurso.fecha_apertura.strftime('%d/%m/%Y %H:%M') if concurso.fecha_apertura else 'N/A' }}</td>
+                    </tr>
+                    <tr>
+                        <th>Fecha Cierre:</th>
+                        <td>{{ concurso.fecha_cierre.strftime('%d/%m/%Y %H:%M') if concurso.fecha_cierre else 'N/A' }}</td>
+                    </tr>
+                    <tr>
+                        <th>Tiempo Restante:</th>
+                        <td><strong>{{ concurso.tiempo_restante() or 'N/A' }}</strong></td>
+                    </tr>
+                    {% if concurso.observacion %}
+                    <tr>
+                        <th>Observacion:</th>
+                        <td class="text-warning">{{ concurso.observacion }}</td>
+                    </tr>
+                    {% endif %}
+                </table>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Inscripciones ({{ inscripciones|length }})</h5>
+            </div>
+            <div class="card-body">
+                {% if inscripciones %}
+                <table class="table table-sm table-hover">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>DNI</th>
+                            <th>Nombre</th>
+                            <th>Categoria</th>
+                            <th>Puntaje</th>
+                            <th>Fecha Inscripcion</th>
+                            <th>Codigo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for insc in inscripciones %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td>{{ insc.dni_docente }}</td>
+                            <td>{{ insc.docente.nombre_completo if insc.docente else 'N/A' }}</td>
+                            <td>
+                                <span class="badge bg-{{ 'primary' if insc.docente.categoria == 'D' else 'success' if insc.docente.categoria == 'H' else 'warning' if insc.docente.categoria == 'S' else 'danger' }}">
+                                    {{ insc.docente.categoria if insc.docente else 'N/A' }}
+                                </span>
+                            </td>
+                            <td>{{ "%.2f"|format(insc.docente.puntaje) if insc.docente else '0.00' }}</td>
+                            <td>{{ insc.fecha_inscripcion.strftime('%d/%m/%Y %H:%M') }}</td>
+                            <td><code>{{ insc.codigo_confirmacion }}</code></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <p class="text-muted text-center">No hay inscripciones aun.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5><i class="bi bi-qr-code"></i> Codigo QR</h5>
+            </div>
+            <div class="card-body text-center">
+                {% if concurso.qr_image_path %}
+                <img src="/{{ concurso.qr_image_path }}" alt="QR" class="img-fluid mb-3" style="max-width: 200px;">
+                <p class="small text-muted">QR generado</p>
+                {% else %}
+                <p class="text-muted">QR no generado</p>
+                {% endif %}
+                <form method="POST" action="{{ url_for('admin.generar_qr', id=concurso.id) }}">
+                    <button type="submit" class="btn btn-primary btn-sm w-100">
+                        <i class="bi bi-qr-code-scan"></i> Generar/Regenerar QR
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5><i class="bi bi-file-pdf"></i> Documentos</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('admin.generar_pdf', id=concurso.id) }}" class="mb-2">
+                    <button type="submit" class="btn btn-success btn-sm w-100">
+                        <i class="bi bi-file-earmark-pdf"></i> Generar PDF Orden de Merito
+                    </button>
+                </form>
+                {% if concurso.pdf_merito_path %}
+                <a href="/{{ concurso.pdf_merito_path }}" class="btn btn-outline-primary btn-sm w-100" download>
+                    <i class="bi bi-download"></i> Descargar PDF
+                </a>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if concurso.estado == 'ACTIVO' %}
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0"><i class="bi bi-exclamation-triangle"></i> Zona Peligrosa</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('admin.cerrar_concurso', id=concurso.id) }}" 
+                      onsubmit="return confirm('Esta seguro de cerrar este concurso?');">
+                    <button type="submit" class="btn btn-danger w-100">
+                        <i class="bi bi-lock-fill"></i> Cerrar Concurso
+                    </button>
+                </form>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

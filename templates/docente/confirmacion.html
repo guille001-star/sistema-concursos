@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block title %}Inscripcion Confirmada{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card border-success">
+            <div class="card-header bg-success text-white text-center">
+                <h4><i class="bi bi-check-circle-fill"></i> !Inscripcion Confirmada!</h4>
+            </div>
+            <div class="card-body text-center">
+                <div class="alert alert-success">
+                    <h5>Su inscripcion fue registrada exitosamente</h5>
+                </div>
+
+                <div class="mb-4">
+                    <h6 class="text-muted">Codigo de Confirmacion</h6>
+                    <div class="display-4 text-primary my-3">
+                        <code>{{ codigo }}</code>
+                    </div>
+                    <p class="text-muted small">Guarde este codigo como comprobante de inscripcion</p>
+                </div>
+
+                <div class="card bg-light mb-4">
+                    <div class="card-body text-start">
+                        <h6>Detalles de la Inscripcion:</h6>
+                        <ul class="list-unstyled mb-0">
+                            <li><strong>Concurso:</strong> {{ concurso.numero }}</li>
+                            <li><strong>Titulo:</strong> {{ concurso.titulo }}</li>
+                            <li><strong>Docente:</strong> {{ docente.nombre_completo }}</li>
+                            <li><strong>DNI:</strong> {{ docente.dni }}</li>
+                            <li><strong>Categoria:</strong> {{ docente.categoria }}</li>
+                            <li><strong>Puntaje:</strong> {{ "%.2f"|format(docente.puntaje) }}</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <a href="{{ url_for('main.index') }}" class="btn btn-primary">
+                    <i class="bi bi-house"></i> Volver al Inicio
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

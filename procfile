@@ -1,0 +1,1 @@
+﻿web: gunicorn run:app --log-file=- --timeout 120 --workers 2

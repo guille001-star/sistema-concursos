@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block title %}Inscripcion - {{ concurso.numero }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4><i class="bi bi-pencil-square"></i> Inscripcion al Concurso</h4>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <h6><strong>{{ concurso.numero }}</strong></h6>
+                    <p class="mb-1">{{ concurso.titulo }}</p>
+                    <small class="text-muted">{{ concurso.espacio_curricular }}</small>
+                </div>
+
+                <div class="mb-3">
+                    <p><strong>Caracter del cargo:</strong> {{ concurso.caracter_cargo }}</p>
+                    <p><strong>Cierre de inscripciones:</strong> 
+                        {{ concurso.fecha_cierre.strftime('%d/%m/%Y %H:%M') if concurso.fecha_cierre else 'N/A' }}
+                    </p>
+                </div>
+
+                <hr>
+
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="dni" class="form-label">DNI *</label>
+                        <input type="text" class="form-control" id="dni" name="dni" 
+                               placeholder="Ingrese su numero de documento" required 
+                               pattern="[0-9]{7,8}" title="DNI debe tener 7 u 8 digitos">
+                        <div class="form-text">Su DNI debe figurar en el listado oficial de docentes.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email *</label>
+                        <input type="email" class="form-control" id="email" name="email" 
+                               placeholder="correo@ejemplo.com" required>
+                        <div class="form-text">Recibira la confirmacion de inscripcion en este email.</div>
+                    </div>
+
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        Al inscribirse, declara estar inscripto en la Junta de Clasificacion 
+                        y en el Listado Definitivo 2026.
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-check-circle"></i> Confirmar Inscripcion
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

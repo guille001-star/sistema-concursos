@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block title %}Lista de Docentes{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="bi bi-people"></i> Docentes Oficiales</h1>
+    <a href="{{ url_for('admin.cargar_listado') }}" class="btn btn-success">
+        <i class="bi bi-upload"></i> Cargar Mas
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        {% if docentes.items %}
+        <table class="table table-hover table-sm">
+            <thead class="table-dark">
+                <tr>
+                    <th>Legajo</th>
+                    <th>DNI</th>
+                    <th>Nombre Completo</th>
+                    <th>Telefono</th>
+                    <th>Categoria</th>
+                    <th>Puntaje</th>
+                    <th>Materia</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for doc in docentes.items %}
+                <tr>
+                    <td>{{ doc.legajo }}</td>
+                    <td>{{ doc.dni }}</td>
+                    <td>{{ doc.nombre_completo }}</td>
+                    <td>{{ doc.telefono }}</td>
+                    <td>
+                        <span class="badge bg-{{ 'primary' if doc.categoria == 'D' else 'success' if doc.categoria == 'H' else 'warning' if doc.categoria == 'S' else 'danger' }}">
+                            {{ doc.categoria }}
+                        </span>
+                    </td>
+                    <td>{{ "%.2f"|format(doc.puntaje) if doc.puntaje else '0.00' }}</td>
+                    <td><small>{{ doc.materia_base }}</small></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <nav>
+            <ul class="pagination justify-content-center">
+                {% if docentes.has_prev %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('admin.listar_docentes', page=docentes.prev_num) }}">Anterior</a>
+                </li>
+                {% endif %}
+                
+                {% for page_num in docentes.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                    {% if page_num %}
+                        <li class="page-item {{ 'active' if page_num == docentes.page else '' }}">
+                            <a class="page-link" href="{{ url_for('admin.listar_docentes', page=page_num) }}">{{ page_num }}</a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled"><span class="page-link">...</span></li>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if docentes.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('admin.listar_docentes', page=docentes.next_num) }}">Siguiente</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% else %}
+        <p class="text-muted text-center">No hay docentes cargados.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

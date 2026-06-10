@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block title %}Inicio{% endblock %}
+{% block content %}
+<h1>Concursos Activos</h1>
+{% if concursos %}
+    {% for c in concursos %}
+    <div class="card mb-3">
+        <div class="card-body">
+            <h5>{{ c.numero }}</h5>
+            <p>{{ c.titulo }}</p>
+            <p><small>{{ c.espacio_curricular }}</small></p>
+        </div>
+    </div>
+    {% endfor %}
+{% else %}
+    <p>No hay concursos activos.</p>
+{% endif %}
+{% endblock %}

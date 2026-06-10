@@ -1,0 +1,45 @@
+﻿# Python
+__pycache__/
+*.py[cod]
+*.class
+*.so
+.Python
+venv/
+ENV/
+env/
+.venv
+
+# Base de datos
+*.db
+*.sqlite
+*.sqlite3
+instance/
+
+# Uploads y archivos generados
+uploads/
+static/qrs/
+static/pdfs/
+*.pdf
+
+# Logs
+*.log
+app.log
+
+# Variables de entorno
+.env
+.env.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Railway
+.railway/
