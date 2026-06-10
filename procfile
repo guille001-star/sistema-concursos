@@ -1,1 +1,1 @@
-﻿web: gunicorn run:app --log-file=- --timeout 120 --workers 2
+web: gunicorn run:app --log-file=- --timeout 300 --workers 2 --graceful-timeout 300
