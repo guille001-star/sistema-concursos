@@ -32,6 +32,17 @@
         margin: 15px 0;
         border: 1px solid #dee2e6;
     }
+    .btn-whatsapp {
+        background-color: #25D366;
+        border-color: #25D366;
+        color: white;
+        font-weight: 600;
+    }
+    .btn-whatsapp:hover {
+        background-color: #128C7E;
+        border-color: #128C7E;
+        color: white;
+    }
 </style>
 {% endblock %}
 
@@ -57,10 +68,19 @@
                     <p class="mb-1 text-uppercase fw-bold text-muted small">Código de Confirmación</p>
                     <div class="confirmation-code">{{ codigo_confirmacion }}</div>
                     
-                    <div class="alert alert-warning small mb-0 mt-3 text-start">
+                    <div class="alert alert-warning small mb-3 mt-3 text-start">
                         <i class="bi bi-exclamation-triangle-fill me-2"></i>
                         <strong>Importante:</strong> Tome una captura de pantalla de este código. Es su comprobante de inscripción.
                     </div>
+                    
+                    <!-- BOTÓN DE WHATSAPP -->
+                    <a id="btn-whatsapp" class="btn btn-whatsapp w-100 py-3" target="_blank" rel="noopener">
+                        <i class="bi bi-whatsapp" style="font-size: 1.3rem;"></i>
+                        Enviar comprobante a WhatsApp
+                    </a>
+                    <small class="text-muted d-block mt-2 text-center" style="font-size: 0.8rem;">
+                        <i class="bi bi-info-circle"></i> Se abrirá WhatsApp con el texto listo para enviar.
+                    </small>
                 </div>
 
                 <div class="d-grid gap-2 mt-4">
@@ -70,6 +90,32 @@
                 </div>
             </div>
         </div>
+
+        <!-- Script para generar el mensaje de WhatsApp -->
+        <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const btn = document.getElementById('btn-whatsapp');
+            if (btn) {
+                const concurso = "{{ concurso.numero | e }}";
+                const titulo = "{{ (concurso.titulo or 'Concurso Docente') | e }}";
+                const codigo = "{{ codigo_confirmacion | e }}";
+                const fecha = new Date().toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                const hora = new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+                
+                const mensaje = 
+                    "📋 *COMPROBANTE DE INSCRIPCIÓN*%0A" +
+                    "━━━━━━━━━━━━━━━━━━%0A" +
+                    "🏛️ *Concurso:* " + concurso + "%0A" +
+                    "📝 *Título:* " + titulo + "%0A" +
+                    "🔑 *Código:* " + codigo + "%0A" +
+                    " *Fecha:* " + fecha + " " + hora + "%0A" +
+                    "━━━━━━━━━━━━━━━━━━%0A" +
+                    "⚠️ Conservá este código como respaldo oficial de tu inscripción ante la Junta de Clasificación.";
+                
+                btn.href = "https://wa.me/?text=" + mensaje;
+            }
+        });
+        </script>
 
     {% else %}
         <!-- VISTA DEL FORMULARIO -->
@@ -126,4 +172,3 @@
     {% endif %}
 </div>
 {% endblock %}
-
