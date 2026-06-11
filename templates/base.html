@@ -2,47 +2,43 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>{% block title %}Concursos
-    </main>
-</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Sistema de Concursos{% endblock %}</title>
+    <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
     <style>
-        /* Layout Flexbox para evitar superposición de Header y Footer */
         body {
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-            margin: 0;
-            background-color: #f8f9fa; /* Color de fondo suave para toda la app */
-        }
-        main.main-content {
-            flex: 1 0 auto; /* Esto empuja el footer hacia abajo y ocupa el espacio restante */
-            padding-top: 2rem;
-            padding-bottom: 2rem;
+            background-color: #f4f6f9;
         }
         .institutional-header {
-            flex-shrink: 0; /* Evita que el header se encoja */
+            background-color: #ffffff;
+            border-bottom: 3px solid #003366;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
         .footer {
-            flex-shrink: 0; /* Evita que el footer se encoja */
+            background: linear-gradient(135deg, #1a1a2e 0%, #0f3460 100%);
+            color: #e0e0e0;
+            margin-top: auto; /* Empuja el footer al fondo */
         }
     </style>
 </head>
-<body>
+<body class="d-flex flex-column min-vh-100">
 
     <!-- Encabezado Institucional -->
-    <header class="institutional-header bg-white border-bottom shadow-sm" style="border-bottom: 3px solid #003366 !important;">
-        <div class="container py-3">
+    <header class="institutional-header py-3">
+        <div class="container">
             <div class="d-flex flex-column flex-md-row align-items-center justify-content-center text-center text-md-start">
                 <div class="mb-2 mb-md-0 me-md-3">
-                    <!-- Icono institucional (puede reemplazarse por el escudo de Chubut en el futuro) -->
                     <i class="bi bi-building-fill" style="font-size: 2.5rem; color: #003366;"></i>
                 </div>
                 <div>
-                    <h4 class="mb-1 fw-bold" style="color: #003366; letter-spacing: 0.5px; text-transform: uppercase;">
+                    <h4 class="mb-1 fw-bold text-uppercase" style="color: #003366; letter-spacing: 0.5px;">
                         Ministerio de Educación
                     </h4>
-                    <h6 class="mb-0 fw-semibold text-uppercase" style="color: #555555; font-size: 0.95rem;">
+                    <h6 class="mb-0 fw-semibold text-uppercase" style="color: #555555; font-size: 0.9rem;">
                         Provincia del Chubut 
                         <span class="mx-2 text-muted">|</span> 
                         Departamento de Designaciones 
@@ -53,100 +49,60 @@
             </div>
         </div>
     </header>
-    <nav class="navbar navbar-dark bg-dark p-3">
-        <a class="navbar-brand" href="/">Concursos Docentes</a>
-    </nav>
-    <div class="container mt-4">
+
+    <!-- Contenido Principal (Crece para ocupar el espacio) -->
+    <main class="flex-grow-1 container py-4">
+        
+        <!-- Mensajes Flash (Alertas) -->
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
-                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                    <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
                 {% endfor %}
             {% endif %}
         {% endwith %}
-    <main class="main-content container">
 
+        <!-- Bloque de contenido de cada página -->
+        {% block content %}{% endblock %}
+        
     </main>
-</div>
 
     <!-- Footer Profesional -->
-    <footer class="footer mt-auto py-4" style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); color: #e0e0e0; box-shadow: 0 -4px 6px rgba(0,0,0,0.1);">
+    <footer class="footer py-4 mt-auto">
         <div class="container">
             <div class="row align-items-center">
-                <!-- Columna izquierda: Información del desarrollador -->
                 <div class="col-md-6 mb-3 mb-md-0">
-                    <div class="d-flex align-items-center">
-                        <div class="footer-icon me-3">
-                            <i class="bi bi-code-slash" style="font-size: 2rem; color: #4fc3f7;"></i>
-                        </div>
+                    <div class="d-flex align-items-center justify-content-center justify-content-md-start">
+                        <i class="bi bi-code-slash me-3" style="font-size: 2rem; color: #4fc3f7;"></i>
                         <div>
-                            <h6 class="mb-1" style="color: #ffffff; font-weight: 600;">
-                                Prof. Lic. Guillermo Enrique Oyarzo
-                            </h6>
-                            <p class="mb-0 small" style="color: #b0bec5;">
-                                <i class="bi bi-laptop me-1"></i>Desarrollo de Sistemas de Información
-                            </p>
-                            <p class="mb-0 small" style="color: #b0bec5;">
+                            <h6 class="mb-1 text-white fw-bold">Prof. Lic. Guillermo Enrique Oyarzo</h6>
+                            <p class="mb-0 small text-light opacity-75">
+                                <i class="bi bi-laptop me-1"></i>Desarrollo de Sistemas de Información<br>
                                 <i class="bi bi-lightbulb me-1"></i>Innovación Educativa
                             </p>
                         </div>
                     </div>
                 </div>
-                
-                <!-- Columna derecha: Institución y copyright -->
-                <div class="col-md-6 text-md-end">
+                <div class="col-md-6 text-center text-md-end">
                     <div class="mb-2">
                         <i class="bi bi-mortarboard" style="color: #4fc3f7;"></i>
-                        <span class="ms-2" style="color: #ffffff; font-weight: 500;">
-                            Educación de Chubut
-                        </span>
+                        <span class="ms-2 text-white fw-semibold">Educación de Chubut</span>
                     </div>
-                    <p class="mb-1 small" style="color: #90a4ae;">
+                    <p class="mb-1 small text-light opacity-75">
                         <i class="bi bi-geo-alt-fill me-1"></i>Provincia del Chubut - Patagonia Argentina
                     </p>
-                    <p class="mb-0 small" style="color: #78909c;">
+                    <p class="mb-0 small text-light opacity-50">
                         <i class="bi bi-c-circle me-1"></i> 2026 - Todos los derechos reservados
-                    </p>
-                </div>
-            </div>
-            
-            <!-- Línea divisoria -->
-            <hr style="border-color: rgba(255,255,255,0.1); margin: 1.5rem 0 1rem 0;">
-            
-            <!-- Línea inferior: Información adicional -->
-            <div class="row">
-                <div class="col-12 text-center">
-                    <p class="mb-0 small" style="color: #607d8b; font-size: 0.85rem;">
-                        <i class="bi bi-shield-check me-1"></i>
-                        Sistema de Concursos Docentes - Gestión Transparente y Eficiente
-                        <span class="mx-2">|</span>
-                        <i class="bi bi-clock me-1"></i>
-                        Última actualización: <span id="footer-timestamp"></span>
                     </p>
                 </div>
             </div>
         </div>
     </footer>
 
-    <!-- Script para actualizar el timestamp del footer -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const now = new Date();
-            const options = { 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            };
-            const timestamp = now.toLocaleDateString('es-AR', options);
-            const footerTimestamp = document.getElementById('footer-timestamp');
-            if (footerTimestamp) {
-                footerTimestamp.textContent = timestamp;
-            }
-        });
-    </script>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
-
-
