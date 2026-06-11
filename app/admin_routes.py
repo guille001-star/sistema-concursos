@@ -8,6 +8,8 @@ from datetime import datetime
 from app.parser import parsear_pdf
 from app.qr_generator import generar_qr_concurso
 from app.merit import generar_orden_merito
+from app.pdf_generator import generar_pdf_orden_merito
+from app.acta_generator import generar_acta_designacion
 import logging
 
 logger = logging.getLogger(__name__)
@@ -118,9 +120,10 @@ def detalle_concurso(id):
 def generar_qr(id):
     try:
         concurso = Concurso.query.get_or_404(id)
-        filepath, url = generar_qr_concurso(concurso)
+        forzar_nuevo = request.form.get('forzar_nuevo') == 'on'
+        filepath, url = generar_qr_concurso(concurso, forzar_nuevo=forzar_nuevo)
         db.session.commit()
-        flash(f'QR generado: {url}', 'success')
+        flash(f'QR {"regenerado" if forzar_nuevo else "verificado"}: {url}', 'success')
     except Exception as e:
         logger.error(f"Error al generar QR: {e}")
         flash(f'Error al generar QR: {str(e)}', 'danger')
@@ -130,8 +133,6 @@ def generar_qr(id):
 @admin_required
 def generar_pdf(id):
     try:
-        from app.pdf_generator import generar_pdf_orden_merito
-from app.acta_generator import generar_acta_designacion
         concurso = Concurso.query.get_or_404(id)
         resultado = generar_orden_merito(id)
         
@@ -147,6 +148,33 @@ from app.acta_generator import generar_acta_designacion
     except Exception as e:
         logger.error(f"Error al generar PDF: {e}")
         flash(f'Error al generar PDF: {str(e)}', 'danger')
+    return redirect(url_for('admin.detalle_concurso', id=id))
+
+@admin_bp.route('/concurso/<int:id>/generar-acta', methods=['POST'])
+@admin_required
+def generar_acta(id):
+    try:
+        concurso = Concurso.query.get_or_404(id)
+        
+        # Obtener el ganador del orden de mérito
+        resultado = generar_orden_merito(id)
+        
+        docente_ganador = None
+        if resultado and isinstance(resultado, list) and len(resultado) > 0:
+            for item in resultado:
+                if item.get('categoria') != 'T':
+                    docente_ganador = DocenteOficial.query.filter_by(dni=item['dni']).first()
+                    break
+        
+        filepath = generar_acta_designacion(concurso, docente_ganador)
+        concurso.acta_designacion_path = filepath
+        db.session.commit()
+        
+        flash('Acta de designación generada correctamente', 'success')
+    except Exception as e:
+        logger.error(f"Error al generar acta: {e}")
+        flash(f'Error al generar acta: {str(e)}', 'danger')
+    
     return redirect(url_for('admin.detalle_concurso', id=id))
 
 @admin_bp.route('/concurso/<int:id>/cerrar', methods=['POST'])
@@ -203,36 +231,3 @@ def listar_docentes():
     page = request.args.get('page', 1, type=int)
     docentes = DocenteOficial.query.order_by(DocenteOficial.nombre_completo).paginate(page=page, per_page=50)
     return render_template('admin/listar_docentes.html', docentes=docentes)
-
-
-
-
-
-@admin_bp.route('/concurso/<int:id>/generar-acta', methods=['POST'])
-@admin_required
-def generar_acta(id):
-    try:
-        concurso = Concurso.query.get_or_404(id)
-        
-        # Obtener el primer inscripto (ganador) del orden de mérito
-        from app.merit import generar_orden_merito
-        resultado = generar_orden_merito(id)
-        
-        docente_ganador = None
-        if resultado and isinstance(resultado, list) and len(resultado) > 0:
-            # Buscar el ganador (el primero que no sea 'T')
-            for item in resultado:
-                if item.get('categoria') != 'T':
-                    docente_ganador = DocenteOficial.query.filter_by(dni=item['dni']).first()
-                    break
-        
-        filepath = generar_acta_designacion(concurso, docente_ganador)
-        concurso.acta_designacion_path = filepath
-        db.session.commit()
-        
-        flash('Acta de designación generada correctamente', 'success')
-    except Exception as e:
-        logger.error(f"Error al generar acta: {e}")
-        flash(f'Error al generar acta: {str(e)}', 'danger')
-    
-    return redirect(url_for('admin.detalle_concurso', id=id))
