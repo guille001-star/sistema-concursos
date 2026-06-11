@@ -9,7 +9,7 @@ import os
 
 def generar_acta_designacion(concurso, docente_ganador):
     """
-    Genera el Acta de Designación en PDF con formato oficial automatizado.
+    Genera el Acta de Designación en PDF compacto (todo en 1 hoja A4).
     """
     # Crear carpeta de actas si no existe
     actas_dir = os.path.join('static', 'actas')
@@ -19,21 +19,21 @@ def generar_acta_designacion(concurso, docente_ganador):
     filename = f"acta_{concurso.numero.replace('/', '_')}.pdf"
     filepath = os.path.join(actas_dir, filename)
     
-    # Crear el documento
+    # Documento con márgenes reducidos para aprovechar más espacio
     doc = SimpleDocTemplate(filepath, pagesize=A4,
-                           rightMargin=2*cm, leftMargin=2*cm,
-                           topMargin=2.5*cm, bottomMargin=2*cm)
+                           rightMargin=1.8*cm, leftMargin=1.8*cm,
+                           topMargin=1.8*cm, bottomMargin=1.5*cm)
     
     elementos = []
     estilos = getSampleStyleSheet()
     
-    # Estilos personalizados
+    # Estilos compactos
     estilo_titulo = ParagraphStyle(
         'Titulo',
         parent=estilos['Heading1'],
-        fontSize=16,
+        fontSize=14,
         alignment=TA_CENTER,
-        spaceAfter=15,
+        spaceAfter=8,
         textColor=colors.HexColor('#003366'),
         fontName='Helvetica-Bold'
     )
@@ -41,47 +41,48 @@ def generar_acta_designacion(concurso, docente_ganador):
     estilo_subtitulo = ParagraphStyle(
         'Subtitulo',
         parent=estilos['Normal'],
-        fontSize=10,
+        fontSize=9,
         alignment=TA_CENTER,
-        spaceAfter=20,
-        textColor=colors.black
+        spaceAfter=2,
+        textColor=colors.black,
+        fontName='Helvetica-Bold',
+        leading=11
     )
     
     estilo_texto = ParagraphStyle(
         'Texto',
         parent=estilos['Normal'],
-        fontSize=11,
-        spaceAfter=8,
+        fontSize=10,
+        spaceAfter=4,
         textColor=colors.black,
-        leading=14
+        leading=12
     )
     
     estilo_negrita = ParagraphStyle(
         'Negrita',
         parent=estilos['Normal'],
-        fontSize=11,
-        spaceAfter=8,
+        fontSize=10,
+        spaceAfter=3,
         textColor=colors.black,
         fontName='Helvetica-Bold',
-        leading=14
+        leading=12
     )
     
-    # Encabezado institucional
+    # === ENCABEZADO INSTITUCIONAL (compacto) ===
     elementos.append(Paragraph("<b>MINISTERIO DE EDUCACIÓN DE LA PROVINCIA DEL CHUBUT</b>", estilo_subtitulo))
-    elementos.append(Paragraph("<b>DEPARTAMENTO DE DESIGNACIONES DE EDUCACIÓN SECUNDARIA</b>", estilo_subtitulo))
-    elementos.append(Paragraph("<b>REGIÓN 1</b>", estilo_subtitulo))
-    elementos.append(Spacer(1, 0.5*cm))
+    elementos.append(Paragraph("<b>DEPARTAMENTO DE DESIGNACIONES DE EDUCACIÓN SECUNDARIA - REGIÓN 1</b>", estilo_subtitulo))
+    elementos.append(Spacer(1, 0.2*cm))
     
-    # Título del acta
-    elementos.append(Paragraph("ACTA DE DESIGNACIÓN", estilo_titulo))
+    # === TÍTULO ===
+    numero_acta = f" N° {concurso.numero_acta}" if concurso.numero_acta else ""
+    elementos.append(Paragraph(f"<b>ACTA DE DESIGNACIÓN{numero_acta}</b>", estilo_titulo))
     
-    # Número de acta y fecha
-    numero_acta = f" N°{concurso.numero_acta}" if concurso.numero_acta else ""
+    # Fecha
     fecha_actual = datetime.now().strftime("%d de %B de %Y").upper()
-    elementos.append(Paragraph(f"LAGO PUELO, CHUBUT{numero_acta}, {fecha_actual}", estilo_texto))
-    elementos.append(Spacer(1, 0.3*cm))
+    elementos.append(Paragraph(f"LAGO PUELO, CHUBUT, {fecha_actual}", estilo_texto))
+    elementos.append(Spacer(1, 0.2*cm))
     
-    # Texto introductorio
+    # === TEXTO INTRODUCTORIO ===
     anio_actual = datetime.now().strftime('%Y')
     elementos.append(Paragraph(
         f"El Departamento de Designaciones de Nivel Secundario de la Región 1 Sede Lago Puelo designa "
@@ -89,101 +90,131 @@ def generar_acta_designacion(concurso, docente_ganador):
         f"por orden de mérito al/la docente:",
         estilo_texto
     ))
-    elementos.append(Spacer(1, 0.5*cm))
-    
-    # Datos del docente
-    elementos.append(Paragraph("<b>DATOS DEL DOCENTE DESIGNADO/A:</b>", estilo_negrita))
     elementos.append(Spacer(1, 0.2*cm))
     
+    # === DATOS DEL DOCENTE (compacto en 2 columnas) ===
+    elementos.append(Paragraph("<b>DATOS DEL DOCENTE DESIGNADO/A:</b>", estilo_negrita))
+    
     if docente_ganador:
-        elementos.append(Paragraph(
-            f"<b>Apellido y Nombres:</b> {docente_ganador.nombre_completo.upper() if docente_ganador.nombre_completo else '___________________________'}",
-            estilo_texto
-        ))
-        elementos.append(Paragraph(
-            f"<b>D.N.I.:</b> {docente_ganador.dni if docente_ganador.dni else '_______________'}",
-            estilo_texto
-        ))
-        elementos.append(Paragraph(
-            f"<b>C.U.I.L.:</b> _________________________",  # Espacio en blanco - único campo manual
-            estilo_texto
-        ))
+        nombre = docente_ganador.nombre_completo.upper() if docente_ganador.nombre_completo else '___________________________'
+        dni = docente_ganador.dni if docente_ganador.dni else '_______________'
+        telefono = docente_ganador.telefono if docente_ganador.telefono else '_________________________'
         
-        # Fecha de nacimiento y domicilio en una línea
-        elementos.append(Paragraph(
-            f"<b>F. Nac.:</b> ___ / ___ / ______  <b>Domicilio:</b> _________________________________________",
-            estilo_texto
-        ))
-        elementos.append(Paragraph(
-            f"<b>Teléfono:</b> {docente_ganador.telefono if docente_ganador.telefono else '_________________________'}",
-            estilo_texto
-        ))
+        datos_docente = [
+            ['Apellido y Nombres:', nombre],
+            ['D.N.I.:', dni, 'C.U.I.L.:', '_________________________'],
+            ['F. Nac.:', '___ / ___ / ______', 'Domicilio:', '______________________________________'],
+            ['Teléfono:', telefono, '', ''],
+        ]
+        
+        tabla_docente = Table(datos_docente, colWidths=[2.8*cm, 5.2*cm, 1.8*cm, 5.5*cm])
+        tabla_docente.setStyle(TableStyle([
+            ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
+            ('FONTNAME', (2, 0), (2, -1), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, -1), 9),
+            ('TOPPADDING', (0, 0), (-1, -1), 3),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 3),
+            ('SPAN', (1, 3), (3, 3)),  # Teléfono ocupa 3 columnas
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ]))
+        elementos.append(tabla_docente)
     else:
         elementos.append(Paragraph("<i>Sin docente asignado</i>", estilo_texto))
     
-    elementos.append(Spacer(1, 0.5*cm))
-    
-    # Datos del cargo
-    elementos.append(Paragraph("<b>ESPACIO CURRICULAR / CARGO:</b>", estilo_negrita))
     elementos.append(Spacer(1, 0.3*cm))
     
-    # Tabla de datos del cargo con TODOS los campos automatizados
-    datos_tabla = [
-        ['Concurso N°:', concurso.numero],
-        ['Título:', concurso.titulo or '___________________________'],
-        ['Espacio Curricular:', concurso.espacio_curricular or (concurso.materia.nombre if concurso.materia else '___________________________')],
-        ['Carácter del Cargo:', concurso.caracter_cargo],
-        ['Folio del Llamado:', f"N°{concurso.folio_llamado}" if concurso.folio_llamado else "N° _______"],
-        ['Escuela N°:', concurso.escuela_numero or "_______"],
-        ['Localidad:', concurso.escuela_localidad or "________________"],
-        ['Horas del Cargo:', concurso.horas_cargo or "________________"],
+    # === DATOS DEL CARGO (compacto) ===
+    elementos.append(Paragraph("<b>DATOS DEL CARGO / ESPACIO CURRICULAR:</b>", estilo_negrita))
+    
+    materia_nombre = ''
+    if concurso.materia:
+        materia_nombre = concurso.materia.nombre
+    elif concurso.espacio_curricular:
+        materia_nombre = concurso.espacio_curricular
+    else:
+        materia_nombre = '___________________________'
+    
+    fecha_inicio_str = ''
+    if concurso.fecha_inicio:
+        fecha_inicio_str = concurso.fecha_inicio.strftime("%d/%m/%Y")
+    
+    datos_cargo = [
+        ['Concurso N°:', concurso.numero, 'Carácter:', concurso.caracter_cargo or '________'],
+        ['Título:', concurso.titulo or '____________________', '', ''],
+        ['Espacio Curricular:', materia_nombre, '', ''],
+        ['Escuela N°:', concurso.escuela_numero or '_______', 'Localidad:', concurso.escuela_localidad or '____________'],
+        ['Folio Llamado N°:', concurso.folio_llamado or '_______', 'Horas:', concurso.horas_cargo or '________'],
     ]
     
     if concurso.horario_cargo:
-        datos_tabla.append(['Horario:', concurso.horario_cargo])
+        datos_cargo.append(['Horario:', concurso.horario_cargo, '', ''])
     
-    if concurso.fecha_inicio:
-        fecha_ini = concurso.fecha_inicio.strftime("%d/%m/%Y")
+    if fecha_inicio_str:
+        datos_cargo.append(['Fecha Inicio:', fecha_inicio_str, 'Acta N°:', concurso.numero_acta or '________'])
+    
+    tabla_cargo = Table(datos_cargo, colWidths=[2.8*cm, 5.2*cm, 1.8*cm, 5.5*cm])
+    tabla_cargo.setStyle(TableStyle([
+        ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
+        ('FONTNAME', (2, 0), (2, -1), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, -1), 9),
+        ('TOPPADDING', (0, 0), (-1, -1), 3),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 3),
+        # Span para campos largos
+        ('SPAN', (1, 1), (3, 1)),  # Título
+        ('SPAN', (1, 2), (3, 2)),  # Espacio Curricular
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+    ]))
+    
+    # Si hay horario, también ocupa las 4 columnas
+    if concurso.horario_cargo:
+        tabla_cargo.setStyle(TableStyle([
+            ('SPAN', (1, -2 if fecha_inicio_str else -1), (3, -2 if fecha_inicio_str else -1)),
+        ]))
+    
+    elementos.append(tabla_cargo)
+    
+    # === TEXTO FINAL ===
+    elementos.append(Spacer(1, 0.3*cm))
+    if concurso.folio_llamado and concurso.escuela_localidad:
+        desde_texto = f" desde el {fecha_inicio_str}" if fecha_inicio_str else ""
         elementos.append(Paragraph(
-            f"Desde el {fecha_ini} en la Escuela N°{concurso.escuela_numero or '___'} de la localidad de {concurso.escuela_localidad or '________________'}.",
+            f"En observaciones correspondiente/s al llamado N° {concurso.folio_llamado} de la localidad de {concurso.escuela_localidad}{desde_texto}.",
             estilo_texto
         ))
     
-    tabla_cargo = Table(datos_tabla, colWidths=[4.5*cm, 9.5*cm])
-    tabla_cargo.setStyle(TableStyle([
-        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-        ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, -1), 10),
-        ('TOPPADDING', (0, 0), (-1, -1), 6),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
-        ('TEXTCOLOR', (0, 0), (0, -1), colors.black),
-    ]))
+    # === FIRMA (ajustada para que entre en la misma hoja) ===
+    elementos.append(Spacer(1, 1.2*cm))
     
-    elementos.append(tabla_cargo)
-    elementos.append(Spacer(1, 1*cm))
+    firma_style = ParagraphStyle(
+        'Firma',
+        parent=estilos['Normal'],
+        alignment=TA_CENTER,
+        fontSize=9,
+        leading=11
+    )
     
-    # Espacio para firma y sello
-    elementos.append(Spacer(1, 2*cm))
-    
-    linea_firma = Paragraph(
+    elementos.append(Paragraph(
         "_________________________________________<br/>"
         "<b>FIRMA Y SELLO DE DIRECTOR/A DEL<br/>DPTO. DE DESIGNACIONES</b>",
-        ParagraphStyle('Firma', parent=estilos['Normal'], alignment=TA_CENTER, fontSize=9)
-    )
-    elementos.append(linea_firma)
+        firma_style
+    ))
     
-    elementos.append(Spacer(1, 1.5*cm))
+    elementos.append(Spacer(1, 0.5*cm))
     
-    # Pie de página
-    pie = Paragraph(
-        "<font size='8' color='#666666'>"
-        "Ministerio de Educación de la Provincia del Chubut<br/>"
-        "Departamento de Designaciones Nivel Secundario - Región 1 Lago Puelo<br/>"
-        "Remigio Nogués s/n, Lago Puelo, Chubut | Tel: 02944-499415"
-        "</font>",
-        ParagraphStyle('Pie', parent=estilos['Normal'], alignment=TA_CENTER, fontSize=8, textColor=colors.grey)
+    # === PIE DE PÁGINA (compacto) ===
+    pie_style = ParagraphStyle(
+        'Pie',
+        parent=estilos['Normal'],
+        alignment=TA_CENTER,
+        fontSize=7,
+        textColor=colors.grey,
+        leading=9
     )
-    elementos.append(pie)
+    elementos.append(Paragraph(
+        "Ministerio de Educación - Provincia del Chubut | Dpto. Designaciones Nivel Secundario - Región 1 Lago Puelo<br/>"
+        "Remigio Nogués s/n, Lago Puelo, Chubut | Tel: 02944-499415",
+        pie_style
+    ))
     
     # Generar el PDF
     doc.build(elementos)
