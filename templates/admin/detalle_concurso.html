@@ -153,19 +153,34 @@
             </div>
         </div>
 
-        <div class="card mb-4">
+                <div class="card mb-4">
             <div class="card-header">
                 <h5><i class="bi bi-file-pdf"></i> Documentos</h5>
             </div>
             <div class="card-body">
+                <h6 class="text-muted mb-3">Orden de Mérito</h6>
                 <form method="POST" action="{{ url_for('admin.generar_pdf', id=concurso.id) }}" class="mb-2">
                     <button type="submit" class="btn btn-success btn-sm w-100">
-                        <i class="bi bi-file-earmark-pdf"></i> Generar PDF Orden de Merito
+                        <i class="bi bi-file-earmark-pdf"></i> Generar PDF Orden de Mérito
                     </button>
                 </form>
                 {% if concurso.pdf_merito_path %}
-                <a href="/{{ concurso.pdf_merito_path }}" class="btn btn-outline-primary btn-sm w-100" download>
-                    <i class="bi bi-download"></i> Descargar PDF
+                <a href="/{{ concurso.pdf_merito_path }}" class="btn btn-outline-primary btn-sm w-100 mb-3" download>
+                    <i class="bi bi-download"></i> Descargar PDF Orden de Mérito
+                </a>
+                {% endif %}
+                
+                <hr class="my-3">
+                
+                <h6 class="text-muted mb-3">Acta de Designación</h6>
+                <form method="POST" action="{{ url_for('admin.generar_acta', id=concurso.id) }}" class="mb-2">
+                    <button type="submit" class="btn btn-info btn-sm w-100">
+                        <i class="bi bi-file-earmark-check"></i> Generar Acta de Designación
+                    </button>
+                </form>
+                {% if concurso.acta_designacion_path %}
+                <a href="/{{ concurso.acta_designacion_path }}" class="btn btn-outline-info btn-sm w-100" download>
+                    <i class="bi bi-download"></i> Descargar Acta
                 </a>
                 {% endif %}
             </div>
@@ -189,4 +204,5 @@
     </div>
 </div>
 {% endblock %}
+
 
