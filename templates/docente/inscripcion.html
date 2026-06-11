@@ -4,111 +4,115 @@
 
 {% block extra_css %}
 <style>
-    .form-container {
-        max-width: 500px;
-        margin: 0 auto;
-        padding: 15px;
-    }
-    .card {
+    .form-container { max-width: 500px; margin: 0 auto; padding: 15px; }
+    .card { border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border: none; }
+    .form-control, .form-select { font-size: 16px; padding: 12px; border-radius: 8px; }
+    .btn-primary { padding: 14px; font-size: 18px; font-weight: 600; border-radius: 8px; }
+    .info-box { background: linear-gradient(135deg, #003366 0%, #004080 100%); color: white; padding: 20px; border-radius: 12px 12px 0 0; }
+    .info-box h6 { font-size: 18px; margin-bottom: 5px; }
+    .info-box p { margin: 3px 0; font-size: 14px; opacity: 0.9; }
+    
+    /* Estilos para el comprobante de éxito */
+    .success-ticket {
+        border: 2px dashed #003366;
+        background-color: #f8f9fa;
         border-radius: 12px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        padding: 25px;
+        text-align: center;
+        margin-top: 20px;
     }
-    .form-control, .form-select {
-        font-size: 16px; /* Evita zoom en iOS */
-        padding: 12px;
+    .confirmation-code {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #003366;
+        letter-spacing: 2px;
+        background: #fff;
+        padding: 10px 20px;
         border-radius: 8px;
+        display: inline-block;
+        margin: 15px 0;
+        border: 1px solid #dee2e6;
     }
-    .btn-primary {
-        padding: 14px;
-        font-size: 18px;
-        font-weight: 600;
-        border-radius: 8px;
-    }
-    .info-box {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 20px;
-        border-radius: 12px;
-        margin-bottom: 20px;
-    }
-    .info-box h6 {
-        font-size: 20px;
-        margin-bottom: 8px;
-    }
-    .info-box p {
-        margin: 5px 0;
-        font-size: 14px;
-    }
-    .alert-warning {
-        font-size: 13px;
-        padding: 12px;
-        border-radius: 8px;
-    }
-    @media (max-width: 576px) {
-        .form-container {
-            padding: 10px;
-        }
-        .info-box {
-            padding: 15px;
-        }
-        .info-box h6 {
-            font-size: 18px;
-        }
-    }
+    .success-icon { font-size: 4rem; color: #198754; }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="form-container">
-    <div class="info-box">
-        <h6><strong>{{ concurso.numero }}</strong></h6>
-        <p>{{ concurso.titulo }}</p>
-        <p><small>{{ concurso.espacio_curricular }}</small></p>
-    </div>
-
-    <div class="card">
-        <div class="card-body">
-            <h5 class="card-title text-center mb-4">
-                <i class="bi bi-pencil-square"></i> Inscripción
-            </h5>
-
-            <div class="mb-3">
-                <p class="mb-1"><strong>Carácter:</strong> {{ concurso.caracter_cargo }}</p>
-                <p class="mb-0"><strong>Cierre:</strong> 
-                    {{ concurso.fecha_cierre.strftime('%d/%m/%Y %H:%M') if concurso.fecha_cierre else 'N/A' }}
-                </p>
+    {% if codigo_confirmacion %}
+        <!-- VISTA DE ÉXITO: Comprobante Digital -->
+        <div class="card">
+            <div class="info-box text-center">
+                <i class="bi bi-check-circle-fill" style="font-size: 3rem;"></i>
+                <h5 class="mt-2 fw-bold">¡Inscripción Confirmada!</h5>
             </div>
-
-            <hr>
-
-            <form method="POST">
-                <div class="mb-3">
-                    <label for="dni" class="form-label fw-bold">DNI *</label>
-                    <input type="text" class="form-control" id="dni" name="dni" 
-                           placeholder="Ej: 12345678" required 
-                           pattern="[0-9]{7,8}" title="DNI debe tener 7 u 8 dígitos"
-                           inputmode="numeric" autocomplete="off">
-                    <small class="text-muted">Su DNI debe figurar en el listado oficial</small>
+            <div class="card-body">
+                <p class="text-center text-muted mb-3">
+                    Estimado/a docente, su registro ha sido procesado exitosamente en el sistema.
+                </p>
+                
+                <div class="success-ticket">
+                    <p class="mb-1 text-uppercase fw-bold text-muted small">Concurso N°</p>
+                    <h5 class="fw-bold text-dark">{{ concurso.numero }}</h5>
+                    <p class="small text-muted mb-3">{{ concurso.titulo }}</p>
+                    
+                    <p class="mb-1 text-uppercase fw-bold text-muted small">Código de Confirmación</p>
+                    <div class="confirmation-code">{{ codigo_confirmacion }}</div>
+                    
+                    <div class="alert alert-warning small mb-0 mt-3 text-start">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        <strong>Importante:</strong> Tome una captura de pantalla de este código o anótelo. Es su único comprobante de inscripción ante la Junta de Clasificación.
+                    </div>
                 </div>
 
-                <div class="mb-3">
-                    <label for="email" class="form-label fw-bold">Email *</label>
-                    <input type="email" class="form-control" id="email" name="email" 
-                           placeholder="correo@ejemplo.com" required
-                           autocomplete="email">
-                    <small class="text-muted">Recibirá la confirmación aquí</small>
+                <div class="d-grid gap-2 mt-4">
+                    <a href="/" class="btn btn-outline-secondary">
+                        <i class="bi bi-house-door"></i> Volver al Inicio
+                    </a>
                 </div>
-
-                <div class="alert alert-warning">
-                    <i class="bi bi-exclamation-triangle"></i>
-                    Al inscribirse, declara estar inscripto en la Junta de Clasificación.
-                </div>
-
-                <button type="submit" class="btn btn-primary w-100">
-                    <i class="bi bi-check-circle"></i> Confirmar Inscripción
-                </button>
-            </form>
+            </div>
         </div>
-    </div>
+
+    {% else %}
+        <!-- VISTA DEL FORMULARIO -->
+        <div class="card">
+            <div class="info-box">
+                <h6 class="fw-bold"><i class="bi bi-megaphone me-2"></i>{{ concurso.numero }}</h6>
+                <p class="fw-semibold">{{ concurso.titulo }}</p>
+                <p class="small mb-0"><i class="bi bi-book me-1"></i> {{ concurso.espacio_curricular }}</p>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="dni" class="form-label fw-bold">DNI del Docente *</label>
+                        <input type="text" class="form-control" id="dni" name="dni" 
+                               placeholder="Ej: 12345678" required 
+                               pattern="[0-9]{7,8}" title="El DNI debe tener 7 u 8 dígitos"
+                               inputmode="numeric" autocomplete="off">
+                        <small class="text-muted">Debe figurar en el listado oficial de la Junta de Clasificación.</small>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="email" class="form-label fw-bold">Correo Electrónico *</label>
+                        <input type="email" class="form-control" id="email" name="email" 
+                               placeholder="nombre@ejemplo.com" required
+                               autocomplete="email">
+                        <small class="text-muted">Se utilizará para enviar la confirmación (próximamente).</small>
+                    </div>
+
+                    <div class="form-check mb-4">
+                        <input class="form-check-input" type="checkbox" id="declaracion" required>
+                        <label class="form-check-label small" for="declaracion">
+                            Declaro que los datos son verdaderos y que me encuentro inscripto en la Junta de Clasificación correspondiente.
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-send-check"></i> Confirmar Inscripción
+                    </button>
+                </form>
+            </div>
+        </div>
+    {% endif %}
 </div>
 {% endblock %}
