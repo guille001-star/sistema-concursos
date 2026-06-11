@@ -9,8 +9,7 @@ import os
 
 def generar_acta_designacion(concurso, docente_ganador):
     """
-    Genera el Acta de Designación en PDF con formato oficial.
-    Usa los datos disponibles y deja espacios para completar manualmente.
+    Genera el Acta de Designación en PDF con formato oficial automatizado.
     """
     # Crear carpeta de actas si no existe
     actas_dir = os.path.join('static', 'actas')
@@ -20,7 +19,7 @@ def generar_acta_designacion(concurso, docente_ganador):
     filename = f"acta_{concurso.numero.replace('/', '_')}.pdf"
     filepath = os.path.join(actas_dir, filename)
     
-    # Crear el documento (orientación vertical)
+    # Crear el documento
     doc = SimpleDocTemplate(filepath, pagesize=A4,
                            rightMargin=2*cm, leftMargin=2*cm,
                            topMargin=2.5*cm, bottomMargin=2*cm)
@@ -76,15 +75,17 @@ def generar_acta_designacion(concurso, docente_ganador):
     # Título del acta
     elementos.append(Paragraph("ACTA DE DESIGNACIÓN", estilo_titulo))
     
-    # Fecha y lugar
+    # Número de acta y fecha
+    numero_acta = f" N°{concurso.numero_acta}" if concurso.numero_acta else ""
     fecha_actual = datetime.now().strftime("%d de %B de %Y").upper()
-    elementos.append(Paragraph(f"LAGO PUELO, CHUBUT, {fecha_actual}", estilo_texto))
+    elementos.append(Paragraph(f"LAGO PUELO, CHUBUT{numero_acta}, {fecha_actual}", estilo_texto))
     elementos.append(Spacer(1, 0.3*cm))
     
     # Texto introductorio
+    anio_actual = datetime.now().strftime('%Y')
     elementos.append(Paragraph(
         f"El Departamento de Designaciones de Nivel Secundario de la Región 1 Sede Lago Puelo designa "
-        f"en base al listado definitivo de {datetime.now().strftime('%Y')} de la Junta de Clasificación Docente "
+        f"en base al listado definitivo de {anio_actual} de la Junta de Clasificación Docente "
         f"por orden de mérito al/la docente:",
         estilo_texto
     ))
@@ -104,15 +105,17 @@ def generar_acta_designacion(concurso, docente_ganador):
             estilo_texto
         ))
         elementos.append(Paragraph(
-            f"<b>C.U.I.L.:</b> _________________________",  # Espacio en blanco
+            f"<b>C.U.I.L.:</b> _________________________",  # Espacio en blanco - único campo manual
             estilo_texto
         ))
+        
+        # Fecha de nacimiento y domicilio en una línea
         elementos.append(Paragraph(
             f"<b>F. Nac.:</b> ___ / ___ / ______  <b>Domicilio:</b> _________________________________________",
             estilo_texto
         ))
         elementos.append(Paragraph(
-            f"<b>Teléfono:</b> _________________________",
+            f"<b>Teléfono:</b> {docente_ganador.telefono if docente_ganador.telefono else '_________________________'}",
             estilo_texto
         ))
     else:
@@ -124,16 +127,29 @@ def generar_acta_designacion(concurso, docente_ganador):
     elementos.append(Paragraph("<b>ESPACIO CURRICULAR / CARGO:</b>", estilo_negrita))
     elementos.append(Spacer(1, 0.3*cm))
     
-    # Tabla de datos del cargo
+    # Tabla de datos del cargo con TODOS los campos automatizados
     datos_tabla = [
         ['Concurso N°:', concurso.numero],
         ['Título:', concurso.titulo or '___________________________'],
         ['Espacio Curricular:', concurso.espacio_curricular or (concurso.materia.nombre if concurso.materia else '___________________________')],
         ['Carácter del Cargo:', concurso.caracter_cargo],
-        ['Folio del Llamado:', 'N° _______'],  # Espacio en blanco
+        ['Folio del Llamado:', f"N°{concurso.folio_llamado}" if concurso.folio_llamado else "N° _______"],
+        ['Escuela N°:', concurso.escuela_numero or "_______"],
+        ['Localidad:', concurso.escuela_localidad or "________________"],
+        ['Horas del Cargo:', concurso.horas_cargo or "________________"],
     ]
     
-    tabla_cargo = Table(datos_tabla, colWidths=[4*cm, 10*cm])
+    if concurso.horario_cargo:
+        datos_tabla.append(['Horario:', concurso.horario_cargo])
+    
+    if concurso.fecha_inicio:
+        fecha_ini = concurso.fecha_inicio.strftime("%d/%m/%Y")
+        elementos.append(Paragraph(
+            f"Desde el {fecha_ini} en la Escuela N°{concurso.escuela_numero or '___'} de la localidad de {concurso.escuela_localidad or '________________'}.",
+            estilo_texto
+        ))
+    
+    tabla_cargo = Table(datos_tabla, colWidths=[4.5*cm, 9.5*cm])
     tabla_cargo.setStyle(TableStyle([
         ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
         ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
@@ -144,14 +160,6 @@ def generar_acta_designacion(concurso, docente_ganador):
     ]))
     
     elementos.append(tabla_cargo)
-    elementos.append(Spacer(1, 0.5*cm))
-    
-    # Texto de observaciones
-    elementos.append(Paragraph(
-        "<b>OBSERVACIONES:</b> EN OBSERVACIONES correspondiente/s al llamado N°______ de la localidad de Lago Puelo. "
-        "Desde el ___/___/______.",
-        estilo_texto
-    ))
     elementos.append(Spacer(1, 1*cm))
     
     # Espacio para firma y sello

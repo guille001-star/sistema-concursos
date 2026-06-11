@@ -31,7 +31,15 @@ class Concurso(db.Model):
     qr_image_path = db.Column(db.String(200), nullable=True)
     pdf_listado_path = db.Column(db.String(200), nullable=True)
     pdf_merito_path = db.Column(db.String(200), nullable=True)
-    acta_designacion_path = db.Column(db.String(200), nullable=True)
+        acta_designacion_path = db.Column(db.String(200), nullable=True)
+    # Campos para Acta de Designación
+    folio_llamado = db.Column(db.String(50), nullable=True)
+    escuela_numero = db.Column(db.String(20), nullable=True)
+    escuela_localidad = db.Column(db.String(100), nullable=True)
+    horas_cargo = db.Column(db.String(50), nullable=True)
+    horario_cargo = db.Column(db.Text, nullable=True)
+    fecha_inicio = db.Column(db.Date, nullable=True)
+    numero_acta = db.Column(db.String(50), nullable=True)
     creado_en = db.Column(db.DateTime, default=datetime.utcnow)
     actualizado_en = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
@@ -121,4 +129,5 @@ class LogAuditoria(db.Model):
     detalle = db.Column(db.Text, nullable=True)
     ip_address = db.Column(db.String(50), nullable=True)
     user_id = db.Column(db.Integer, nullable=True)
+
 

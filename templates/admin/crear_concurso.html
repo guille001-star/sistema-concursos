@@ -4,20 +4,26 @@
 
 {% block content %}
 <div class="row justify-content-center">
-    <div class="col-md-8">
+    <div class="col-md-10">
         <div class="card">
             <div class="card-header bg-primary text-white">
                 <h4><i class="bi bi-plus-circle"></i> Crear Nuevo Concurso</h4>
             </div>
             <div class="card-body">
                 <form method="POST">
+                    <h6 class="mb-3 text-primary border-bottom pb-2">Datos Generales del Concurso</h6>
                     <div class="row mb-3">
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <label for="numero" class="form-label">Numero de Concurso *</label>
                             <input type="text" class="form-control" id="numero" name="numero" 
                                    placeholder="Ej: 68/2026" required>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-4">
+                            <label for="numero_acta" class="form-label">Numero de Acta</label>
+                            <input type="text" class="form-control" id="numero_acta" name="numero_acta" 
+                                   placeholder="Ej: 296/26">
+                        </div>
+                        <div class="col-md-4">
                             <label for="caracter_cargo" class="form-label">Caracter del Cargo *</label>
                             <select class="form-select" id="caracter_cargo" name="caracter_cargo" required>
                                 <option value="Titular">Titular</option>
@@ -42,23 +48,58 @@
                             <option value="{{ materia.id }}">{{ materia.nombre }}</option>
                             {% endfor %}
                         </select>
-                        <small class="text-muted">Seleccione la materia del listado oficial</small>
                     </div>
                     
+                    <h6 class="mb-3 text-primary border-bottom pb-2 mt-4">Datos de la Escuela y Llamado</h6>
                     <div class="row mb-3">
-                        <div class="col-md-6">
+                        <div class="col-md-3">
+                            <label for="escuela_numero" class="form-label">Numero de Escuela</label>
+                            <input type="text" class="form-control" id="escuela_numero" name="escuela_numero" 
+                                   placeholder="Ej: 765">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="escuela_localidad" class="form-label">Localidad de la Escuela</label>
+                            <input type="text" class="form-control" id="escuela_localidad" name="escuela_localidad" 
+                                   placeholder="Ej: Lago Puelo">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="folio_llamado" class="form-label">Folio del Llamado</label>
+                            <input type="text" class="form-control" id="folio_llamado" name="folio_llamado" 
+                                   placeholder="Ej: 92">
+                        </div>
+                        <div class="col-md-2">
+                            <label for="horas_cargo" class="form-label">Horas del Cargo</label>
+                            <input type="text" class="form-control" id="horas_cargo" name="horas_cargo" 
+                                   placeholder="Ej: 2 HC + 1 HC">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="horario_cargo" class="form-label">Horario del Cargo</label>
+                        <textarea class="form-control" id="horario_cargo" name="horario_cargo" rows="2" 
+                                  placeholder="Ej: MIÉRCOLES DE 14:30 A 15:50 HS Y JUEVES DE 13:00 A 13:40 (EIS)"></textarea>
+                    </div>
+                    
+                    <h6 class="mb-3 text-primary border-bottom pb-2 mt-4">Fechas</h6>
+                    <div class="row mb-3">
+                        <div class="col-md-4">
                             <label for="fecha_apertura" class="form-label">Fecha de Apertura *</label>
                             <input type="datetime-local" class="form-control" id="fecha_apertura" 
                                    name="fecha_apertura" required>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <label for="fecha_cierre" class="form-label">Fecha de Cierre *</label>
                             <input type="datetime-local" class="form-control" id="fecha_cierre" 
                                    name="fecha_cierre" required>
                         </div>
+                        <div class="col-md-4">
+                            <label for="fecha_inicio" class="form-label">Fecha de Inicio del Cargo</label>
+                            <input type="date" class="form-control" id="fecha_inicio" 
+                                   name="fecha_inicio">
+                        </div>
                     </div>
                     
-                    <div class="d-flex justify-content-between">
+                    <div class="d-flex justify-content-between mt-4">
                         <a href="{{ url_for('admin.dashboard') }}" class="btn btn-secondary">
                             <i class="bi bi-arrow-left"></i> Volver
                         </a>

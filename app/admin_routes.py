@@ -78,6 +78,12 @@ def crear_concurso():
                 flash(f'El concurso {numero} ya existe', 'danger')
                 return redirect(url_for('admin.crear_concurso'))
             
+            # Obtener fecha de inicio si existe
+            fecha_inicio_str = request.form.get('fecha_inicio')
+            fecha_inicio = None
+            if fecha_inicio_str:
+                fecha_inicio = datetime.strptime(fecha_inicio_str, '%Y-%m-%d').date()
+            
             concurso = Concurso(
                 numero=numero,
                 titulo=titulo,
@@ -85,6 +91,13 @@ def crear_concurso():
                 caracter_cargo=caracter,
                 fecha_apertura=fecha_apertura,
                 fecha_cierre=fecha_cierre,
+                fecha_inicio=fecha_inicio,
+                folio_llamado=request.form.get('folio_llamado'),
+                escuela_numero=request.form.get('escuela_numero'),
+                escuela_localidad=request.form.get('escuela_localidad'),
+                horas_cargo=request.form.get('horas_cargo'),
+                horario_cargo=request.form.get('horario_cargo'),
+                numero_acta=request.form.get('numero_acta'),
                 estado='ACTIVO'
             )
             
@@ -231,3 +244,4 @@ def listar_docentes():
     page = request.args.get('page', 1, type=int)
     docentes = DocenteOficial.query.order_by(DocenteOficial.nombre_completo).paginate(page=page, per_page=50)
     return render_template('admin/listar_docentes.html', docentes=docentes)
+
