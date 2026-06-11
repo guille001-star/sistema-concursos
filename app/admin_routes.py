@@ -208,11 +208,52 @@ def listar_docentes():
     return render_template('admin/listar_docentes.html', docentes=docentes)
 
 
-# ENDPOINT TEMPORAL - ELIMINAR DESPUÉS DE USAR
 @admin_bp.route('/reset-db', methods=['POST'])
 @admin_required
 def reset_db_temporal():
     """Resetea la base de datos. ELIMINAR DESPUÉS DE USAR."""
+    try:
+        db.drop_all()
+        db.create_all()
+        
+        # Recrear admin
+        admin = Admin(username='admin')
+        admin.set_password('admin123')
+        db.session.add(admin)
+        db.session.commit()
+        
+        flash('Base de datos reseteada correctamente', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error: {str(e)}', 'danger')
+    
+    return redirect(url_for('admin.dashboard'))
+
+
+
+# ENDPOINT TEMPORAL - ELIMINAR DESPUÉS DE USAR
+@admin_bp.route('/reset-db', methods=['GET', 'POST'])
+@admin_required
+def reset_db_temporal():
+    """Resetea la base de datos. ELIMINAR DESPUÉS DE USAR."""
+    if request.method == 'GET':
+        return '''
+        <html>
+        <head><title>Reset DB</title></head>
+        <body style="font-family: Arial; padding: 40px; text-align: center;">
+            <h1>⚠️ Resetear Base de Datos</h1>
+            <p>Esto borrará TODOS los datos (docentes, concursos, inscripciones).</p>
+            <form method="POST">
+                <button type="submit" style="background: red; color: white; padding: 15px 30px; font-size: 18px; border: none; border-radius: 5px; cursor: pointer;">
+                    CONFIRMAR RESET
+                </button>
+            </form>
+            <p style="margin-top: 20px;"><a href="/admin/dashboard">Cancelar y volver al Dashboard</a></p>
+        </body>
+        </html>
+        '''
+    
+    # Si es POST, ejecutar el reset
     try:
         db.drop_all()
         db.create_all()
