@@ -250,7 +250,7 @@ def listar_docentes():
 # ENDPOINT TEMPORAL DE MIGRACIÓN - EJECUTAR UNA VEZ Y ELIMINAR
 @admin_bp.route('/migrar-db', methods=['GET'])
 @admin_required
-def migrar_db_temporal():
+def migrar_db_temporal():  # Deploy trigger 20260611-142333
     """Migra la base de datos agregando las columnas faltantes."""
     try:
         from sqlalchemy import text
@@ -283,3 +283,4 @@ def migrar_db_temporal():
     except Exception as e:
         db.session.rollback()
         return f"Error: {str(e)}"
+
