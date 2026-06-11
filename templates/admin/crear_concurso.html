@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+﻿{% extends 'base.html' %}
 
 {% block title %}Crear Concurso{% endblock %}
 
@@ -35,9 +35,14 @@
                     </div>
                     
                     <div class="mb-3">
-                        <label for="espacio_curricular" class="form-label">Espacio Curricular</label>
-                        <input type="text" class="form-control" id="espacio_curricular" name="espacio_curricular" 
-                               placeholder="Ej: GEOGRAFIA (EPJA)">
+                        <label for="materia_id" class="form-label">Materia / Espacio Curricular *</label>
+                        <select class="form-select" id="materia_id" name="materia_id" required>
+                            <option value="">-- Seleccionar Materia --</option>
+                            {% for materia in materias %}
+                            <option value="{{ materia.id }}">{{ materia.nombre }}</option>
+                            {% endfor %}
+                        </select>
+                        <small class="text-muted">Seleccione la materia del listado oficial</small>
                     </div>
                     
                     <div class="row mb-3">

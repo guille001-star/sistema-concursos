@@ -6,7 +6,8 @@ from app.merit import generar_orden_merito
 from app.qr_generator import generar_qr_concurso
 from app.pdf_generator import generar_pdf_orden_merito
 from app.utils import log_auditoria, validar_fecha_concurso, sanitizar_input, formatear_error
-from datetime import datetime
+from functools import lru_cache
+from datetime import datetime, timedelta
 import secrets
 import os
 
@@ -294,3 +295,4 @@ def generar_pdf_merito(id):
         db.session.rollback()
         log_auditoria('ERROR_GENERAR_PDF_MERITO', str(e))
         return jsonify(formatear_error(e)), 500
+

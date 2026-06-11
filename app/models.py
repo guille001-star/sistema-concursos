@@ -21,6 +21,7 @@ class Concurso(db.Model):
     numero = db.Column(db.String(50), unique=True, nullable=False)
     titulo = db.Column(db.String(200))
     espacio_curricular = db.Column(db.String(200))
+    materia_id = db.Column(db.Integer, db.ForeignKey('materia.id'), nullable=True)
     fecha_apertura = db.Column(db.DateTime)
     fecha_cierre = db.Column(db.DateTime)
     caracter_cargo = db.Column(db.String(20))
@@ -33,6 +34,7 @@ class Concurso(db.Model):
     creado_en = db.Column(db.DateTime, default=datetime.utcnow)
     actualizado_en = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
+    materia = db.relationship('Materia', backref='concursos', lazy=True)
     inscripciones = db.relationship('Inscripcion', backref='concurso', lazy=True, cascade='all, delete-orphan')
     
     def esta_activo(self):
@@ -50,19 +52,47 @@ class Concurso(db.Model):
         minutos, _ = divmod(resto, 60)
         return f"{dias}d {horas}h {minutos}m"
 
+class Materia(db.Model):
+    __tablename__ = 'materia'
+    id = db.Column(db.Integer, primary_key=True)
+    nombre = db.Column(db.String(300), unique=True, nullable=False)
+    creado_en = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    puntajes = db.relationship('PuntajeMateria', backref='materia', lazy=True, cascade='all, delete-orphan')
+
 class DocenteOficial(db.Model):
     __tablename__ = 'docentes_oficiales'
     id = db.Column(db.Integer, primary_key=True)
     legajo = db.Column(db.String(20))
-    dni = db.Column(db.String(20), index=True, unique=True)
+    dni = db.Column(db.String(20), index=True, unique=True, nullable=False)
     nombre_completo = db.Column(db.String(250))
     telefono = db.Column(db.String(50))
-    categoria = db.Column(db.String(10))
-    puntaje = db.Column(db.Float)
-    materia_base = db.Column(db.String(200))
+    
+    puntajes = db.relationship('PuntajeMateria', backref='docente', lazy=True, cascade='all, delete-orphan')
+    
+    def obtener_puntaje_para_materia(self, materia_id):
+        """Obtiene el puntaje y categoría para una materia específica."""
+        puntaje = PuntajeMateria.query.filter_by(
+            docente_id=self.id,
+            materia_id=materia_id
+        ).first()
+        return puntaje
     
     def __repr__(self):
         return f'<Docente {self.dni}>'
+
+class PuntajeMateria(db.Model):
+    """Relación muchos-a-muchos entre docente y materia con categoría y puntaje."""
+    __tablename__ = 'puntaje_materia'
+    id = db.Column(db.Integer, primary_key=True)
+    docente_id = db.Column(db.Integer, db.ForeignKey('docentes_oficiales.id'), nullable=False)
+    materia_id = db.Column(db.Integer, db.ForeignKey('materia.id'), nullable=False)
+    categoria = db.Column(db.String(10), nullable=False)  # D, H, S, T
+    puntaje = db.Column(db.Float, nullable=False)
+    
+    __table_args__ = (
+        db.UniqueConstraint('docente_id', 'materia_id', name='uq_docente_materia'),
+    )
 
 class Inscripcion(db.Model):
     id = db.Column(db.Integer, primary_key=True)

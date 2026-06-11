@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+﻿{% extends 'base.html' %}
 
 {% block title %}Detalle Concurso {{ concurso.numero }}{% endblock %}
 
@@ -27,8 +27,14 @@
                         <td>{{ concurso.titulo or 'N/A' }}</td>
                     </tr>
                     <tr>
-                        <th>Espacio Curricular:</th>
-                        <td>{{ concurso.espacio_curricular or 'N/A' }}</td>
+                        <th>Materia:</th>
+                        <td>
+                            {% if concurso.materia %}
+                                <strong>{{ concurso.materia.nombre }}</strong>
+                            {% else %}
+                                <span class="text-muted">No asignada</span>
+                            {% endif %}
+                        </td>
                     </tr>
                     <tr>
                         <th>Caracter del Cargo:</th>
@@ -89,11 +95,31 @@
                             <td>{{ insc.dni_docente }}</td>
                             <td>{{ insc.docente.nombre_completo if insc.docente else 'N/A' }}</td>
                             <td>
-                                <span class="badge bg-{{ 'primary' if insc.docente.categoria == 'D' else 'success' if insc.docente.categoria == 'H' else 'warning' if insc.docente.categoria == 'S' else 'danger' }}">
-                                    {{ insc.docente.categoria if insc.docente else 'N/A' }}
-                                </span>
+                                {% if concurso.materia_id and insc.docente %}
+                                    {% set puntaje_materia = insc.docente.obtener_puntaje_para_materia(concurso.materia_id) %}
+                                    {% if puntaje_materia %}
+                                        <span class="badge bg-{{ 'primary' if puntaje_materia.categoria == 'D' else 'success' if puntaje_materia.categoria == 'H' else 'warning' if puntaje_materia.categoria == 'S' else 'danger' }}">
+                                            {{ puntaje_materia.categoria }}
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-danger">T</span>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="text-muted">N/A</span>
+                                {% endif %}
                             </td>
-                            <td>{{ "%.2f"|format(insc.docente.puntaje) if insc.docente else '0.00' }}</td>
+                            <td>
+                                {% if concurso.materia_id and insc.docente %}
+                                    {% set puntaje_materia = insc.docente.obtener_puntaje_para_materia(concurso.materia_id) %}
+                                    {% if puntaje_materia %}
+                                        {{ "%.2f"|format(puntaje_materia.puntaje) }}
+                                    {% else %}
+                                        0.00
+                                    {% endif %}
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </td>
                             <td>{{ insc.fecha_inscripcion.strftime('%d/%m/%Y %H:%M') }}</td>
                             <td><code>{{ insc.codigo_confirmacion }}</code></td>
                         </tr>

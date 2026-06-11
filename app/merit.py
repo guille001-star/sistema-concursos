@@ -1,4 +1,4 @@
-﻿from app.models import Inscripcion, DocenteOficial, Concurso
+﻿from app.models import Inscripcion, DocenteOficial, Concurso, PuntajeMateria
 from app import db
 import logging
 
@@ -14,7 +14,7 @@ PRIORIDAD_CAT = {
 def generar_orden_merito(concurso_id):
     """
     Genera el orden de mérito de un concurso.
-    Retorna lista ordenada o dict con error.
+    Usa el puntaje específico para la materia del concurso.
     """
     try:
         concurso = Concurso.query.get(concurso_id)
@@ -33,11 +33,32 @@ def generar_orden_merito(concurso_id):
         for insc in inscripciones:
             doc = DocenteOficial.query.filter_by(dni=insc.dni_docente).first()
             if not doc:
-                logger.warning(f"Docente {insc.dni_docente} no encontrado en listado oficial")
+                logger.warning(f"Docente {insc.dni_docente} no encontrado")
                 continue
             
-            categoria = doc.categoria.upper() if doc.categoria else 'T'
-            puntaje = float(doc.puntaje) if doc.puntaje else 0.0
+            # Obtener el puntaje específico para la materia del concurso
+            if concurso.materia_id:
+                puntaje_materia = PuntajeMateria.query.filter_by(
+                    docente_id=doc.id,
+                    materia_id=concurso.materia_id
+                ).first()
+                
+                if puntaje_materia:
+                    categoria = puntaje_materia.categoria.upper()
+                    puntaje = puntaje_materia.puntaje
+                else:
+                    # Si no tiene puntaje para esta materia, es "Fuera de Listado"
+                    categoria = 'T'
+                    puntaje = 0.0
+            else:
+                # Si el concurso no tiene materia asignada, usar el mejor puntaje del docente
+                mejor_puntaje = PuntajeMateria.query.filter_by(docente_id=doc.id).order_by(PuntajeMateria.puntaje.desc()).first()
+                if mejor_puntaje:
+                    categoria = mejor_puntaje.categoria.upper()
+                    puntaje = mejor_puntaje.puntaje
+                else:
+                    categoria = 'T'
+                    puntaje = 0.0
             
             lista.append({
                 'inscripcion_id': insc.id,
