@@ -206,3 +206,27 @@ def listar_docentes():
     page = request.args.get('page', 1, type=int)
     docentes = DocenteOficial.query.order_by(DocenteOficial.nombre_completo).paginate(page=page, per_page=50)
     return render_template('admin/listar_docentes.html', docentes=docentes)
+
+
+# ENDPOINT TEMPORAL - ELIMINAR DESPUÉS DE USAR
+@admin_bp.route('/reset-db', methods=['POST'])
+@admin_required
+def reset_db_temporal():
+    """Resetea la base de datos. ELIMINAR DESPUÉS DE USAR."""
+    try:
+        db.drop_all()
+        db.create_all()
+        
+        # Recrear admin
+        admin = Admin(username='admin')
+        admin.set_password('admin123')
+        db.session.add(admin)
+        db.session.commit()
+        
+        flash('Base de datos reseteada correctamente', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error: {str(e)}', 'danger')
+    
+    return redirect(url_for('admin.dashboard'))
+
