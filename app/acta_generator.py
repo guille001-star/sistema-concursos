@@ -3,13 +3,13 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import cm
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
 from reportlab.lib import colors
-from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
+from reportlab.lib.enums import TA_CENTER, TA_LEFT
 from datetime import datetime
 import os
 
 def generar_acta_designacion(concurso, docente_ganador):
     """
-    Genera el Acta de Designación en PDF con formato equilibrado (1 hoja A4).
+    Genera el Acta de Designación en PDF corregido (sin superposiciones y fecha en español).
     """
     actas_dir = os.path.join('static', 'actas')
     os.makedirs(actas_dir, exist_ok=True)
@@ -17,7 +17,7 @@ def generar_acta_designacion(concurso, docente_ganador):
     filename = f"acta_{concurso.numero.replace('/', '_')}.pdf"
     filepath = os.path.join(actas_dir, filename)
     
-    # Márgenes balanceados
+    # Documento con márgenes estándar
     doc = SimpleDocTemplate(filepath, pagesize=A4,
                            rightMargin=2*cm, leftMargin=2*cm,
                            topMargin=2*cm, bottomMargin=1.5*cm)
@@ -25,11 +25,11 @@ def generar_acta_designacion(concurso, docente_ganador):
     elementos = []
     estilos = getSampleStyleSheet()
     
-    # Estilos con espaciado adecuado
+    # Estilos
     estilo_titulo = ParagraphStyle(
         'Titulo',
         parent=estilos['Heading1'],
-        fontSize=15,
+        fontSize=16,
         alignment=TA_CENTER,
         spaceAfter=10,
         textColor=colors.HexColor('#003366'),
@@ -43,8 +43,7 @@ def generar_acta_designacion(concurso, docente_ganador):
         alignment=TA_CENTER,
         spaceAfter=3,
         textColor=colors.black,
-        fontName='Helvetica-Bold',
-        leading=11
+        fontName='Helvetica-Bold'
     )
     
     estilo_texto = ParagraphStyle(
@@ -62,8 +61,7 @@ def generar_acta_designacion(concurso, docente_ganador):
         fontSize=10,
         spaceAfter=5,
         textColor=colors.black,
-        fontName='Helvetica-Bold',
-        leading=12
+        fontName='Helvetica-Bold'
     )
     
     # === ENCABEZADO ===
@@ -75,12 +73,17 @@ def generar_acta_designacion(concurso, docente_ganador):
     numero_acta = f" N° {concurso.numero_acta}" if concurso.numero_acta else ""
     elementos.append(Paragraph(f"<b>ACTA DE DESIGNACIÓN{numero_acta}</b>", estilo_titulo))
     
-    fecha_actual = datetime.now().strftime("%d de %B de %Y").upper()
+    # CORRECCIÓN: Fecha en español manualmente para evitar "JUNE"
+    meses = {1: 'ENERO', 2: 'FEBRERO', 3: 'MARZO', 4: 'ABRIL', 5: 'MAYO', 6: 'JUNIO', 
+             7: 'JULIO', 8: 'AGOSTO', 9: 'SEPTIEMBRE', 10: 'OCTUBRE', 11: 'NOVIEMBRE', 12: 'DICIEMBRE'}
+    ahora = datetime.now()
+    fecha_actual = f"{ahora.day} DE {meses[ahora.month]} DE {ahora.year}"
+    
     elementos.append(Paragraph(f"LAGO PUELO, CHUBUT, {fecha_actual}", estilo_texto))
     elementos.append(Spacer(1, 0.3*cm))
     
     # === TEXTO INTRODUCTORIO ===
-    anio_actual = datetime.now().strftime('%Y')
+    anio_actual = ahora.strftime('%Y')
     elementos.append(Paragraph(
         f"El Departamento de Designaciones de Nivel Secundario de la Región 1 Sede Lago Puelo designa "
         f"en base al listado definitivo de {anio_actual} de la Junta de Clasificación Docente "
@@ -91,14 +94,13 @@ def generar_acta_designacion(concurso, docente_ganador):
     
     # === DATOS DEL DOCENTE ===
     elementos.append(Paragraph("<b>DATOS DEL DOCENTE DESIGNADO/A:</b>", estilo_negrita))
-    elementos.append(Spacer(1, 0.15*cm))
+    elementos.append(Spacer(1, 0.1*cm))
     
     if docente_ganador:
         nombre = docente_ganador.nombre_completo.upper() if docente_ganador.nombre_completo else '___________________________'
         dni = docente_ganador.dni if docente_ganador.dni else '_______________'
         telefono = docente_ganador.telefono if docente_ganador.telefono else '_________________________'
         
-        # Tabla con 4 columnas y anchos adecuados
         datos_docente = [
             ['Apellido y Nombres:', nombre, '', ''],
             ['D.N.I.:', dni, 'C.U.I.L.:', '_________________________'],
@@ -106,19 +108,19 @@ def generar_acta_designacion(concurso, docente_ganador):
             ['Teléfono:', telefono, '', ''],
         ]
         
-        tabla_docente = Table(datos_docente, colWidths=[3.2*cm, 5.5*cm, 2*cm, 5.8*cm])
+        tabla_docente = Table(datos_docente, colWidths=[3.5*cm, 6*cm, 2*cm, 5*cm])
         tabla_docente.setStyle(TableStyle([
             ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
             ('FONTNAME', (2, 0), (2, -1), 'Helvetica-Bold'),
-            ('FONTSIZE', (0, 0), (-1, -1), 9.5),
-            ('TOPPADDING', (0, 0), (-1, -1), 5),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
-            ('LEFTPADDING', (0, 0), (-1, -1), 2),
-            ('RIGHTPADDING', (0, 0), (-1, -1), 2),
-            ('SPAN', (1, 0), (3, 0)),  # Nombre ocupa 3 columnas
-            ('SPAN', (1, 3), (3, 3)),  # Teléfono ocupa 3 columnas
+            ('FONTSIZE', (0, 0), (-1, -1), 9),
+            ('TOPPADDING', (0, 0), (-1, -1), 6),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+            # CORRECCIÓN: Padding lateral aumentado para evitar superposición
+            ('LEFTPADDING', (0, 0), (-1, -1), 10), 
+            ('RIGHTPADDING', (0, 0), (-1, -1), 5),
+            ('SPAN', (1, 0), (3, 0)),
+            ('SPAN', (1, 3), (3, 3)),
             ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
         ]))
         elementos.append(tabla_docente)
     else:
@@ -128,7 +130,7 @@ def generar_acta_designacion(concurso, docente_ganador):
     
     # === DATOS DEL CARGO ===
     elementos.append(Paragraph("<b>DATOS DEL CARGO / ESPACIO CURRICULAR:</b>", estilo_negrita))
-    elementos.append(Spacer(1, 0.15*cm))
+    elementos.append(Spacer(1, 0.1*cm))
     
     materia_nombre = ''
     if concurso.materia:
@@ -156,23 +158,21 @@ def generar_acta_designacion(concurso, docente_ganador):
     if fecha_inicio_str:
         datos_cargo.append(['Fecha Inicio:', fecha_inicio_str, 'Acta N°:', concurso.numero_acta or '________'])
     
-    tabla_cargo = Table(datos_cargo, colWidths=[3.2*cm, 5.5*cm, 2*cm, 5.8*cm])
+    tabla_cargo = Table(datos_cargo, colWidths=[3.5*cm, 6*cm, 2*cm, 5*cm])
     tabla_cargo.setStyle(TableStyle([
         ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
         ('FONTNAME', (2, 0), (2, -1), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, -1), 9.5),
-        ('TOPPADDING', (0, 0), (-1, -1), 5),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
-        ('LEFTPADDING', (0, 0), (-1, -1), 2),
-        ('RIGHTPADDING', (0, 0), (-1, -1), 2),
-        # Spans para campos largos
-        ('SPAN', (1, 1), (3, 1)),  # Título
-        ('SPAN', (1, 2), (3, 2)),  # Espacio Curricular
+        ('FONTSIZE', (0, 0), (-1, -1), 9),
+        ('TOPPADDING', (0, 0), (-1, -1), 6),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+        # CORRECCIÓN: Padding lateral aumentado
+        ('LEFTPADDING', (0, 0), (-1, -1), 10),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 5),
+        ('SPAN', (1, 1), (3, 1)),
+        ('SPAN', (1, 2), (3, 2)),
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
     ]))
     
-    # Si hay horario, spanear las 3 columnas restantes
     if concurso.horario_cargo:
         tabla_cargo.setStyle(TableStyle([
             ('SPAN', (1, -2 if fecha_inicio_str else -1), (3, -2 if fecha_inicio_str else -1)),
@@ -224,5 +224,4 @@ def generar_acta_designacion(concurso, docente_ganador):
     ))
     
     doc.build(elementos)
-    
     return filepath
