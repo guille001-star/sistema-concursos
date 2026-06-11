@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -19,5 +19,83 @@
         {% endwith %}
         {% block content %}{% endblock %}
     </div>
+
+    <!-- Footer Profesional -->
+    <footer class="footer mt-auto py-4" style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); color: #e0e0e0; box-shadow: 0 -4px 6px rgba(0,0,0,0.1);">
+        <div class="container">
+            <div class="row align-items-center">
+                <!-- Columna izquierda: Información del desarrollador -->
+                <div class="col-md-6 mb-3 mb-md-0">
+                    <div class="d-flex align-items-center">
+                        <div class="footer-icon me-3">
+                            <i class="bi bi-code-slash" style="font-size: 2rem; color: #4fc3f7;"></i>
+                        </div>
+                        <div>
+                            <h6 class="mb-1" style="color: #ffffff; font-weight: 600;">
+                                Prof. Lic. Guillermo Enrique Oyarzo
+                            </h6>
+                            <p class="mb-0 small" style="color: #b0bec5;">
+                                <i class="bi bi-laptop me-1"></i>Desarrollo de Sistemas de Información
+                            </p>
+                            <p class="mb-0 small" style="color: #b0bec5;">
+                                <i class="bi bi-lightbulb me-1"></i>Innovación Educativa
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Columna derecha: Institución y copyright -->
+                <div class="col-md-6 text-md-end">
+                    <div class="mb-2">
+                        <i class="bi bi-mortarboard" style="color: #4fc3f7;"></i>
+                        <span class="ms-2" style="color: #ffffff; font-weight: 500;">
+                            Educación de Chubut
+                        </span>
+                    </div>
+                    <p class="mb-1 small" style="color: #90a4ae;">
+                        <i class="bi bi-geo-alt-fill me-1"></i>Provincia del Chubut - Patagonia Argentina
+                    </p>
+                    <p class="mb-0 small" style="color: #78909c;">
+                        <i class="bi bi-c-circle me-1"></i> 2026 - Todos los derechos reservados
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Línea divisoria -->
+            <hr style="border-color: rgba(255,255,255,0.1); margin: 1.5rem 0 1rem 0;">
+            
+            <!-- Línea inferior: Información adicional -->
+            <div class="row">
+                <div class="col-12 text-center">
+                    <p class="mb-0 small" style="color: #607d8b; font-size: 0.85rem;">
+                        <i class="bi bi-shield-check me-1"></i>
+                        Sistema de Concursos Docentes - Gestión Transparente y Eficiente
+                        <span class="mx-2">|</span>
+                        <i class="bi bi-clock me-1"></i>
+                        Última actualización: <span id="footer-timestamp"></span>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Script para actualizar el timestamp del footer -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const options = { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            };
+            const timestamp = now.toLocaleDateString('es-AR', options);
+            const footerTimestamp = document.getElementById('footer-timestamp');
+            if (footerTimestamp) {
+                footerTimestamp.textContent = timestamp;
+            }
+        });
+    </script>
 </body>
 </html>
