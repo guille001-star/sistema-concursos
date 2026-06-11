@@ -5,14 +5,14 @@ import secrets
 import logging
 
 logger = logging.getLogger(__name__)
-main_bp = Blueprint('main', __name__)
+main = Blueprint('main', __name__)
 
-@main_bp.route('/')
+@main.route('/')
 def index():
     concursos = Concurso.query.filter_by(estado='ACTIVO').order_by(Concurso.fecha_cierre.asc()).all()
     return render_template('docente/index.html', concursos=concursos)
 
-@main_bp.route('/inscripcion/<token>', methods=['GET', 'POST'])
+@main.route('/inscripcion/<token>', methods=['GET', 'POST'])
 def inscripcion(token):
     concurso = Concurso.query.filter_by(qr_token=token).first_or_404()
     
@@ -61,3 +61,4 @@ def inscripcion(token):
             
     # GET request
     return render_template('docente/inscripcion.html', concurso=concurso)
+
