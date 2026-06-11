@@ -1,13 +1,13 @@
 ﻿from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import cm
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, PageBreak
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER, TA_LEFT
 from datetime import datetime
 import os
 
-def generar_pdf_merito(concurso, resultado):
+def generar_pdf_orden_merito(concurso, resultado):
     """
     Genera un PDF profesional con el orden de mérito del concurso.
     
@@ -91,7 +91,7 @@ def generar_pdf_merito(concurso, resultado):
     elementos.append(Spacer(1, 0.8*cm))
     
     # Tabla de orden de mérito
-    if resultado and 'error' not in resultado:
+    if resultado and isinstance(resultado, list) and len(resultado) > 0:
         elementos.append(Paragraph("LISTADO DE INSCRIPTOS POR ORDEN DE MÉRITO", estilo_subtitulo))
         elementos.append(Spacer(1, 0.4*cm))
         
@@ -126,12 +126,12 @@ def generar_pdf_merito(concurso, resultado):
             # Filas de datos
             ('BACKGROUND', (0, 1), (-1, -1), colors.white),
             ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
-            ('ALIGN', (0, 1), (0, -1), 'CENTER'),  # Orden centrado
-            ('ALIGN', (1, 1), (1, -1), 'CENTER'),  # DNI centrado
-            ('ALIGN', (2, 1), (2, -1), 'LEFT'),    # Nombre izquierda
-            ('ALIGN', (3, 1), (3, -1), 'CENTER'),  # Categoría centrada
-            ('ALIGN', (4, 1), (4, -1), 'CENTER'),  # Puntaje centrado
-            ('ALIGN', (5, 1), (5, -1), 'CENTER'),  # Estado centrado
+            ('ALIGN', (0, 1), (0, -1), 'CENTER'),
+            ('ALIGN', (1, 1), (1, -1), 'CENTER'),
+            ('ALIGN', (2, 1), (2, -1), 'LEFT'),
+            ('ALIGN', (3, 1), (3, -1), 'CENTER'),
+            ('ALIGN', (4, 1), (4, -1), 'CENTER'),
+            ('ALIGN', (5, 1), (5, -1), 'CENTER'),
             ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
             ('FONTSIZE', (0, 1), (-1, -1), 9),
             ('TOPPADDING', (0, 1), (-1, -1), 8),
@@ -141,13 +141,13 @@ def generar_pdf_merito(concurso, resultado):
             ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
             ('LINEBELOW', (0, 0), (-1, 0), 1.5, colors.HexColor('#2c3e50')),
             
-            # Resaltar al ganador (primera fila de datos)
+            # Resaltar al ganador
             ('BACKGROUND', (0, 1), (-1, 1), colors.HexColor('#d4edda')),
             ('TEXTCOLOR', (0, 1), (-1, 1), colors.HexColor('#155724')),
             ('FONTNAME', (0, 1), (-1, 1), 'Helvetica-Bold'),
         ])
         
-        # Aplicar colores alternados a las filas
+        # Aplicar colores alternados
         for i in range(2, len(datos_tabla)):
             if i % 2 == 0:
                 estilo_tabla.add('BACKGROUND', (0, i), (-1, i), colors.HexColor('#f8f9fa'))
@@ -155,7 +155,7 @@ def generar_pdf_merito(concurso, resultado):
         tabla.setStyle(estilo_tabla)
         elementos.append(tabla)
         
-        # Pie de página con fecha de generación
+        # Pie de página
         elementos.append(Spacer(1, 1*cm))
         estilo_fecha = ParagraphStyle(
             'Fecha',
