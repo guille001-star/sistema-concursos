@@ -72,7 +72,6 @@ def crear_concurso():
             fecha_apertura = datetime.strptime(request.form.get('fecha_apertura'), '%Y-%m-%dT%H:%M')
             fecha_cierre = datetime.strptime(request.form.get('fecha_cierre'), '%Y-%m-%dT%H:%M')
             
-            # Verificar que el numero no exista
             if Concurso.query.filter_by(numero=numero).first():
                 flash(f'El concurso {numero} ya existe', 'danger')
                 return redirect(url_for('admin.crear_concurso'))
@@ -98,7 +97,6 @@ def crear_concurso():
             logger.error(f"Error al crear concurso: {e}")
             flash(f'Error al crear concurso: {str(e)}', 'danger')
     
-    # Obtener todas las materias para el dropdown
     materias = Materia.query.order_by(Materia.nombre).all()
     return render_template('admin/crear_concurso.html', materias=materias)
 
@@ -181,13 +179,11 @@ def cargar_listado():
             return redirect(url_for('admin.cargar_listado'))
         
         try:
-            # Guardar el archivo temporalmente
             uploads_dir = os.path.join('uploads')
             os.makedirs(uploads_dir, exist_ok=True)
             filepath = os.path.join(uploads_dir, secure_filename(file.filename))
             file.save(filepath)
             
-            # Procesar el PDF
             docentes_creados, materias_creadas, puntajes_creados = parsear_pdf(filepath)
             
             flash(f'PDF procesado: {docentes_creados} docentes, {materias_creadas} materias, {puntajes_creados} puntajes', 'success')
@@ -207,35 +203,10 @@ def listar_docentes():
     docentes = DocenteOficial.query.order_by(DocenteOficial.nombre_completo).paginate(page=page, per_page=50)
     return render_template('admin/listar_docentes.html', docentes=docentes)
 
-
-@admin_bp.route('/reset-db', methods=['POST'])
-@admin_required
-def reset_db_temporal():
-    """Resetea la base de datos. ELIMINAR DESPUÉS DE USAR."""
-    try:
-        db.drop_all()
-        db.create_all()
-        
-        # Recrear admin
-        admin = Admin(username='admin')
-        admin.set_password('admin123')
-        db.session.add(admin)
-        db.session.commit()
-        
-        flash('Base de datos reseteada correctamente', 'success')
-    except Exception as e:
-        db.session.rollback()
-        flash(f'Error: {str(e)}', 'danger')
-    
-    return redirect(url_for('admin.dashboard'))
-
-
-
-# ENDPOINT TEMPORAL - ELIMINAR DESPUÉS DE USAR
+# ENDPOINT TEMPORAL PARA RESETEAR DB (UNA SOLA VEZ)
 @admin_bp.route('/reset-db', methods=['GET', 'POST'])
 @admin_required
-def reset_db_temporal():
-    """Resetea la base de datos. ELIMINAR DESPUÉS DE USAR."""
+def reset_db():
     if request.method == 'GET':
         return '''
         <html>
@@ -253,12 +224,10 @@ def reset_db_temporal():
         </html>
         '''
     
-    # Si es POST, ejecutar el reset
     try:
         db.drop_all()
         db.create_all()
         
-        # Recrear admin
         admin = Admin(username='admin')
         admin.set_password('admin123')
         db.session.add(admin)
@@ -270,4 +239,3 @@ def reset_db_temporal():
         flash(f'Error: {str(e)}', 'danger')
     
     return redirect(url_for('admin.dashboard'))
-
