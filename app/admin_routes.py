@@ -284,3 +284,42 @@ def migrar_db_temporal():  # Deploy trigger 20260611-142333
         db.session.rollback()
         return f"Error: {str(e)}"
 
+
+
+@admin_bp.route('/diagnostico')
+@admin_required
+def diagnostico_dni():
+    from sqlalchemy import text
+    
+    # 1. Ver el formato real de los DNI en la base de datos
+    try:
+        resultados = db.session.execute(text("SELECT dni, nombre_completo FROM docentes_oficiales LIMIT 5")).fetchall()
+        html = "<h1>Diagnóstico de DNI</h1>"
+        html += "<h3>Formato real de los DNI en la Base de Datos (Primeros 5):</h3><ul>"
+        for r in resultados:
+            html += f"<li style='font-family: monospace; font-size: 14px;'>DB: '<b>{r[0]}</b>' | Nombre: {r[1]}</li>"
+        html += "</ul>"
+    except Exception as e:
+        html = f"<h1>Error DB: {e}</h1>"
+    
+    # 2. Buscador de prueba
+    busqueda = request.args.get('q', '')
+    if busqueda:
+        # Limpiar la búsqueda
+        busqueda_limpia = busqueda.replace(' ','').replace('.','').replace('-','')
+        
+        # Buscar en todos los docentes comparando solo números
+        todos = DocenteOficial.query.all()
+        encontrados = []
+        for d in todos:
+            dni_limpio = str(d.dni).replace(' ','').replace('.','').replace('-','')
+            if busqueda_limpia in dni_limpio or dni_limpio in busqueda_limpia:
+                encontrados.append(d)
+                
+        html += f"<h3>Buscando '{busqueda}' (limpio: {busqueda_limpia}):</h3>"
+        html += f"<p style='color: green; font-weight: bold;'>Encontrados: {len(encontrados)}</p>"
+        for e in encontrados[:5]:
+            html += f"<p>Match DB: '<b>{e.dni}</b>' - {e.nombre_completo}</p>"
+            
+    html += "<hr><h3>Probar búsqueda:</h3><form><input name='q' placeholder='Ingresá un DNI' value='" + busqueda + "'><button type='submit'>Buscar</button></form>"
+    return html
