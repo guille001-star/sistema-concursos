@@ -130,7 +130,7 @@ def generar_qr(id):
 @admin_required
 def generar_pdf(id):
     try:
-        from app.pdf_generator import generar_pdf_merito
+        from app.pdf_generator import generar_pdf_orden_merito
         concurso = Concurso.query.get_or_404(id)
         resultado = generar_orden_merito(id)
         
@@ -138,7 +138,7 @@ def generar_pdf(id):
             flash(resultado['error'], 'danger')
             return redirect(url_for('admin.detalle_concurso', id=id))
         
-        filepath = generar_pdf_merito(concurso, resultado)
+        filepath = generar_pdf_orden_merito(concurso, resultado)
         concurso.pdf_merito_path = filepath
         db.session.commit()
         
@@ -239,3 +239,4 @@ def reset_db():
         flash(f'Error: {str(e)}', 'danger')
     
     return redirect(url_for('admin.dashboard'))
+
