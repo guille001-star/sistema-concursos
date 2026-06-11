@@ -131,6 +131,7 @@ def generar_qr(id):
 def generar_pdf(id):
     try:
         from app.pdf_generator import generar_pdf_orden_merito
+from app.acta_generator import generar_acta_designacion
         concurso = Concurso.query.get_or_404(id)
         resultado = generar_orden_merito(id)
         
@@ -204,3 +205,34 @@ def listar_docentes():
     return render_template('admin/listar_docentes.html', docentes=docentes)
 
 
+
+
+
+@admin_bp.route('/concurso/<int:id>/generar-acta', methods=['POST'])
+@admin_required
+def generar_acta(id):
+    try:
+        concurso = Concurso.query.get_or_404(id)
+        
+        # Obtener el primer inscripto (ganador) del orden de mérito
+        from app.merit import generar_orden_merito
+        resultado = generar_orden_merito(id)
+        
+        docente_ganador = None
+        if resultado and isinstance(resultado, list) and len(resultado) > 0:
+            # Buscar el ganador (el primero que no sea 'T')
+            for item in resultado:
+                if item.get('categoria') != 'T':
+                    docente_ganador = DocenteOficial.query.filter_by(dni=item['dni']).first()
+                    break
+        
+        filepath = generar_acta_designacion(concurso, docente_ganador)
+        concurso.acta_designacion_path = filepath
+        db.session.commit()
+        
+        flash('Acta de designación generada correctamente', 'success')
+    except Exception as e:
+        logger.error(f"Error al generar acta: {e}")
+        flash(f'Error al generar acta: {str(e)}', 'danger')
+    
+    return redirect(url_for('admin.detalle_concurso', id=id))
