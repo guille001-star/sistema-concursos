@@ -6,13 +6,12 @@
 <style>
     .form-container { max-width: 500px; margin: 0 auto; padding: 15px; }
     .card { border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border: none; }
-    .form-control, .form-select { font-size: 16px; padding: 12px; border-radius: 8px; }
+    .form-control { font-size: 16px; padding: 12px; border-radius: 8px; }
     .btn-primary { padding: 14px; font-size: 18px; font-weight: 600; border-radius: 8px; }
     .info-box { background: linear-gradient(135deg, #003366 0%, #004080 100%); color: white; padding: 20px; border-radius: 12px 12px 0 0; }
     .info-box h6 { font-size: 18px; margin-bottom: 5px; }
     .info-box p { margin: 3px 0; font-size: 14px; opacity: 0.9; }
     
-    /* Estilos para el comprobante de éxito */
     .success-ticket {
         border: 2px dashed #003366;
         background-color: #f8f9fa;
@@ -33,7 +32,6 @@
         margin: 15px 0;
         border: 1px solid #dee2e6;
     }
-    .success-icon { font-size: 4rem; color: #198754; }
 </style>
 {% endblock %}
 
@@ -48,20 +46,20 @@
             </div>
             <div class="card-body">
                 <p class="text-center text-muted mb-3">
-                    Estimado/a docente, su registro ha sido procesado exitosamente en el sistema.
+                    Estimado/a docente, su registro ha sido procesado exitosamente.
                 </p>
                 
                 <div class="success-ticket">
                     <p class="mb-1 text-uppercase fw-bold text-muted small">Concurso N°</p>
                     <h5 class="fw-bold text-dark">{{ concurso.numero }}</h5>
-                    <p class="small text-muted mb-3">{{ concurso.titulo }}</p>
+                    <p class="small text-muted mb-3">{{ concurso.titulo or 'Sin título especificado' }}</p>
                     
                     <p class="mb-1 text-uppercase fw-bold text-muted small">Código de Confirmación</p>
                     <div class="confirmation-code">{{ codigo_confirmacion }}</div>
                     
                     <div class="alert alert-warning small mb-0 mt-3 text-start">
                         <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                        <strong>Importante:</strong> Tome una captura de pantalla de este código o anótelo. Es su único comprobante de inscripción ante la Junta de Clasificación.
+                        <strong>Importante:</strong> Tome una captura de pantalla de este código. Es su comprobante de inscripción.
                     </div>
                 </div>
 
@@ -78,8 +76,21 @@
         <div class="card">
             <div class="info-box">
                 <h6 class="fw-bold"><i class="bi bi-megaphone me-2"></i>{{ concurso.numero }}</h6>
-                <p class="fw-semibold">{{ concurso.titulo }}</p>
-                <p class="small mb-0"><i class="bi bi-book me-1"></i> {{ concurso.espacio_curricular }}</p>
+                <p class="fw-semibold">{{ concurso.titulo or 'Concurso Docente' }}</p>
+                
+                {% if concurso.materia %}
+                <p class="small mb-1"><i class="bi bi-book me-1"></i> {{ concurso.materia.nombre }}</p>
+                {% elif concurso.espacio_curricular %}
+                <p class="small mb-1"><i class="bi bi-book me-1"></i> {{ concurso.espacio_curricular }}</p>
+                {% endif %}
+                
+                {% if concurso.horario_cargo %}
+                <p class="small mb-1"><i class="bi bi-clock me-1"></i> {{ concurso.horario_cargo }}</p>
+                {% endif %}
+                
+                {% if concurso.escuela_numero %}
+                <p class="small mb-0"><i class="bi bi-geo-alt me-1"></i> Escuela N° {{ concurso.escuela_numero }} - {{ concurso.escuela_localidad or '' }}</p>
+                {% endif %}
             </div>
             <div class="card-body">
                 <form method="POST">
@@ -89,7 +100,7 @@
                                placeholder="Ej: 12345678" required 
                                pattern="[0-9]{7,8}" title="El DNI debe tener 7 u 8 dígitos"
                                inputmode="numeric" autocomplete="off">
-                        <small class="text-muted">Debe figurar en el listado oficial de la Junta de Clasificación.</small>
+                        <small class="text-muted">Debe figurar en el listado oficial.</small>
                     </div>
 
                     <div class="mb-4">
@@ -97,13 +108,12 @@
                         <input type="email" class="form-control" id="email" name="email" 
                                placeholder="nombre@ejemplo.com" required
                                autocomplete="email">
-                        <small class="text-muted">Se utilizará para enviar la confirmación (próximamente).</small>
                     </div>
 
                     <div class="form-check mb-4">
                         <input class="form-check-input" type="checkbox" id="declaracion" required>
                         <label class="form-check-label small" for="declaracion">
-                            Declaro que los datos son verdaderos y que me encuentro inscripto en la Junta de Clasificación correspondiente.
+                            Declaro que los datos son verdaderos y que me encuentro inscripto en la Junta de Clasificación.
                         </label>
                     </div>
 
