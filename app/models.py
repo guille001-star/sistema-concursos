@@ -31,7 +31,7 @@ class Concurso(db.Model):
     qr_image_path = db.Column(db.String(200), nullable=True)
     pdf_listado_path = db.Column(db.String(200), nullable=True)
     pdf_merito_path = db.Column(db.String(200), nullable=True)
-        acta_designacion_path = db.Column(db.String(200), nullable=True)
+    acta_designacion_path = db.Column(db.String(200), nullable=True)
     # Campos para Acta de Designación
     folio_llamado = db.Column(db.String(50), nullable=True)
     escuela_numero = db.Column(db.String(20), nullable=True)
@@ -80,7 +80,6 @@ class DocenteOficial(db.Model):
     puntajes = db.relationship('PuntajeMateria', backref='docente', lazy=True, cascade='all, delete-orphan')
     
     def obtener_puntaje_para_materia(self, materia_id):
-        """Obtiene el puntaje y categoría para una materia específica."""
         puntaje = PuntajeMateria.query.filter_by(
             docente_id=self.id,
             materia_id=materia_id
@@ -91,12 +90,11 @@ class DocenteOficial(db.Model):
         return f'<Docente {self.dni}>'
 
 class PuntajeMateria(db.Model):
-    """Relación muchos-a-muchos entre docente y materia con categoría y puntaje."""
     __tablename__ = 'puntaje_materia'
     id = db.Column(db.Integer, primary_key=True)
     docente_id = db.Column(db.Integer, db.ForeignKey('docentes_oficiales.id'), nullable=False)
     materia_id = db.Column(db.Integer, db.ForeignKey('materia.id'), nullable=False)
-    categoria = db.Column(db.String(10), nullable=False)  # D, H, S, T
+    categoria = db.Column(db.String(10), nullable=False)
     puntaje = db.Column(db.Float, nullable=False)
     
     __table_args__ = (
@@ -129,5 +127,3 @@ class LogAuditoria(db.Model):
     detalle = db.Column(db.Text, nullable=True)
     ip_address = db.Column(db.String(50), nullable=True)
     user_id = db.Column(db.Integer, nullable=True)
-
-

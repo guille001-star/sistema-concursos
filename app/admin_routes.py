@@ -245,3 +245,41 @@ def listar_docentes():
     docentes = DocenteOficial.query.order_by(DocenteOficial.nombre_completo).paginate(page=page, per_page=50)
     return render_template('admin/listar_docentes.html', docentes=docentes)
 
+
+
+# ENDPOINT TEMPORAL DE MIGRACIÓN - EJECUTAR UNA VEZ Y ELIMINAR
+@admin_bp.route('/migrar-db', methods=['GET'])
+@admin_required
+def migrar_db_temporal():
+    """Migra la base de datos agregando las columnas faltantes."""
+    try:
+        from sqlalchemy import text
+        columnas = [
+            "acta_designacion_path VARCHAR(200)",
+            "folio_llamado VARCHAR(50)",
+            "escuela_numero VARCHAR(20)",
+            "escuela_localidad VARCHAR(100)",
+            "horas_cargo VARCHAR(50)",
+            "horario_cargo TEXT",
+            "fecha_inicio DATE",
+            "numero_acta VARCHAR(50)"
+        ]
+        
+        resultados = []
+        for columna in columnas:
+            nombre_col = columna.split()[0]
+            sql = f"ALTER TABLE concurso ADD COLUMN IF NOT EXISTS {nombre_col} {columna.split(' ', 1)[1]}"
+            try:
+                db.session.execute(text(sql))
+                resultados.append(f"✅ {nombre_col}")
+            except Exception as e:
+                if "already exists" in str(e).lower():
+                    resultados.append(f"ℹ️ {nombre_col} ya existe")
+                else:
+                    resultados.append(f"⚠️ {nombre_col}: {e}")
+        
+        db.session.commit()
+        return "<br>".join(resultados)
+    except Exception as e:
+        db.session.rollback()
+        return f"Error: {str(e)}"
