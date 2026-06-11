@@ -323,3 +323,4 @@ def diagnostico_dni():
             
     html += "<hr><h3>Probar búsqueda:</h3><form><input name='q' placeholder='Ingresá un DNI' value='" + busqueda + "'><button type='submit'>Buscar</button></form>"
     return html
+
